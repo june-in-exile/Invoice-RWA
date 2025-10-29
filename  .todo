@@ -1,8 +1,0 @@
-prompt:
-    ☐ please summarize the change in this commit and generate a proper commit message in one sentence that is less than 20 words
-
-backend:
-
-    
-contract:
-    

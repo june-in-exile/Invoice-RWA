@@ -1,0 +1,20 @@
+prompt:
+    ☐ please summarize the change in this commit and generate a proper commit message in one sentence that is less than 20 words
+
+git:
+    feat
+    fix
+    docs
+    style
+    refactor
+    perf
+    test
+    build
+    ci
+    chore
+    revert
+
+backend:
+    How to test the backend?
+    
+contract:
