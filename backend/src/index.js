@@ -1,0 +1,81 @@
+import express from "express";
+import dotenv from "dotenv";
+import cron from "node-cron";
+import userRoutes from "./routes/user.js";
+import invoiceRoutes from "./routes/invoice.js";
+import relayerService from "./services/relayer.js";
+import oracleService from "./services/oracle.js";
+import eventListenerService from "./services/eventListener.js";
+import logger from "./utils/logger.js";
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(express.json());
+
+// Routes
+app.use("/api/users", userRoutes);
+app.use("/api/invoices", invoiceRoutes);
+
+// Health check
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
+// 啟動 Event Listener
+eventListenerService.startListening().catch((error) => {
+  logger.error("Failed to start event listener", { error: error.message });
+});
+
+// 定時任務：監控 Relayer 餘額（每小時）
+cron.schedule("0 * * * *", async () => {
+  try {
+    await relayerService.checkBalance();
+  } catch (error) {
+    logger.error("Relayer balance check failed", { error: error.message });
+  }
+});
+
+// 定時任務：處理開獎結果（每天凌晨 2 點）
+cron.schedule("0 2 * * *", async () => {
+  try {
+    // 處理昨天的開獎
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const lotteryDate = yesterday.toISOString().split("T")[0];
+
+    await oracleService.processLotteryResults(lotteryDate);
+  } catch (error) {
+    logger.error("Lottery processing failed", { error: error.message });
+  }
+});
+
+// Error handling
+app.use((error, req, res, next) => {
+  logger.error("Unhandled error", { error: error.message, stack: error.stack });
+  res.status(500).json({ error: "Internal server error" });
+});
+
+// Start server
+app.listen(PORT, () => {
+  logger.info(`ROFL backend started on port ${PORT}`);
+  logger.info(`Environment: ${process.env.NODE_ENV}`);
+  logger.info(`Relayer address: ${process.env.RELAYER_ADDRESS}`);
+  logger.info(`Oracle address: ${process.env.ORACLE_ADDRESS}`);
+});
+
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  logger.info("SIGTERM received, shutting down gracefully");
+  eventListenerService.stopListening();
+  process.exit(0);
+});
+
+process.on("SIGINT", () => {
+  logger.info("SIGINT received, shutting down gracefully");
+  eventListenerService.stopListening();
+  process.exit(0);
+});
