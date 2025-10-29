@@ -125,7 +125,7 @@ class RelayerService {
     if (balance < this.minBalance) {
       const message = `Relayer balance is low: ${ethers.formatEther(
         balance
-      )} BNB`;
+      )} ETH`;
       logger.error(message);
       await this.sendAlert("LOW_BALANCE", message);
       throw new Error(message);

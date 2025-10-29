@@ -25,10 +25,15 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// 啟動 Event Listener
-eventListenerService.startListening().catch((error) => {
-  logger.error("Failed to start event listener", { error: error.message });
-});
+// Start Event Listener (optional - disable in development if RPC doesn't support subscriptions)
+if (process.env.ENABLE_EVENT_LISTENER !== "false") {
+  eventListenerService.startListening().catch((error) => {
+    logger.error("Failed to start event listener", { error: error.message });
+    logger.warn("Event listener disabled - set ENABLE_EVENT_LISTENER=false to suppress this warning");
+  });
+} else {
+  logger.info("Event listener disabled (ENABLE_EVENT_LISTENER=false)");
+}
 
 // 定時任務：監控 Relayer 餘額（每小時）
 cron.schedule("0 * * * *", async () => {
