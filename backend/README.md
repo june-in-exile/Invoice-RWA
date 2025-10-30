@@ -39,68 +39,6 @@ Backend service for Invoice RWA (Real World Asset) platform that tokenizes physi
 - Winston - Logging
 - node-cron - Task scheduling
 
-## Deployment Options
-
-### Option 1: Local Development
-
-**Fastest way to develop and test**
-
-```bash
-# 1. Install dependencies
-npm install
-
-# 2. Initialize database
-npm run db:init
-
-# 3. Start development server
-npm run dev
-
-# 4. Test APIs
-./test-api.sh --skip-invoice
-```
-
-### Option 2: Docker Compose (Local Container)
-
-**Test the exact container that will run in ROFL**
-
-```bash
-# Build and test
-./test-docker.sh
-
-# Test APIs
-./test-api.sh --skip-invoice
-
-# Stop when done
-docker compose down
-```
-
-See [DOCKER_COMPOSE_GUIDE.md](./DOCKER_COMPOSE_GUIDE.md) for details.
-
-### Option 3: ROFL Deployment (Production)
-
-**Deploy to ROFL network in TEE**
-
-```bash
-# 1. Push image to public registry
-docker push your-username/invoice-rwa-backend:latest
-
-# 2. Initialize ROFL
-oasis rofl init
-
-# 3. Register app on-chain
-oasis rofl create --network testnet
-
-# 4. Set secrets
-oasis rofl secret set RELAYER_PRIVATE_KEY 0x...
-oasis rofl secret set ORACLE_PRIVATE_KEY 0x...
-
-# 5. Build and deploy
-oasis rofl build
-oasis rofl deploy
-```
-
-See [ROFL_DEPLOYMENT.md](./ROFL_DEPLOYMENT.md) for details.
-
 ## API Endpoints
 
 ### Health Check
@@ -294,5 +232,4 @@ const response = await fetch(`${API_BASE_URL}/api/users/register`, {
 ## Documentation
 
 - [QUICK_START.md](./QUICK_START.md) - Quick start guide for all deployment options
-- [ROFL_DEPLOYMENT.md](./ROFL_DEPLOYMENT.md) - Detailed ROFL deployment guide
-- [DOCKER_COMPOSE_GUIDE.md](./DOCKER_COMPOSE_GUIDE.md) - Docker Compose usage guide
+- [ROFL_TESTING.md](./ROFL_TESTING.md) - ROFL deployment testing guide

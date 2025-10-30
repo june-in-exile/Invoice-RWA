@@ -15,8 +15,6 @@ git:
     revert
 
 backend:
-    請更新文檔讓其他開發者知道具體來說要怎麼測試 API
-    test-aip.sh 終於通過了！please summarize the change in contract directory and generate a proper commit message in one sentence that is less than 20 words
-
+    please summarize the change in contract directory and generate a proper commit message in one sentence that is less than 20 words
 
 contract:

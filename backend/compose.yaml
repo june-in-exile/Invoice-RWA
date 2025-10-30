@@ -38,17 +38,22 @@ services:
       - INVOICE_TOKEN_ADDRESS=${INVOICE_TOKEN_ADDRESS}
       - POOL_ADDRESS=${POOL_ADDRESS}
 
+      - INVOICE_TOKEN_V2_ADDRESS=${INVOICE_TOKEN_V2_ADDRESS}
+      - POOL_V2_ADDRESS=${POOL_V2_ADDRESS}
+
+      - ZIRCUIT_TESTNET_RPC_URL=${ZIRCUIT_TESTNET_RPC_URL:-https://zircuit-garfield.liquify.com}
+
       # Relayer configuration (secrets should be set via ROFL CLI in production)
       - RELAYER_PRIVATE_KEY=${RELAYER_PRIVATE_KEY}
       - RELAYER_ADDRESS=${RELAYER_ADDRESS}
+      - ADMIN_PRIVATE_KEY=${ADMIN_PRIVATE_KEY}
+      - ADMIN_ADDRESS=${ADMIN_ADDRESS}
 
       # Oracle configuration
       - ORACLE_PRIVATE_KEY=${ORACLE_PRIVATE_KEY}
       - ORACLE_ADDRESS=${ORACLE_ADDRESS}
 
-      # Government API
-      - GOV_INVOICE_API_URL=${GOV_INVOICE_API_URL:-https://api.einvoice.nat.gov.tw}
-      - GOV_API_KEY=${GOV_API_KEY}
+      - BENEFICIARY_ADDRESS=${BENEFICIARY_ADDRESS}
 
       # Event listener (optional)
       - ENABLE_EVENT_LISTENER=${ENABLE_EVENT_LISTENER:-false}
@@ -63,7 +68,13 @@ services:
 
     # Health check
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})",
+        ]
       interval: 30s
       timeout: 3s
       retries: 3

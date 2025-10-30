@@ -5,8 +5,6 @@ import axios from "axios";
 
 class OracleService {
   constructor() {
-    this.govApiUrl = process.env.GOV_INVOICE_API_URL;
-    this.govApiKey = process.env.GOV_API_KEY;
   }
 
   /**

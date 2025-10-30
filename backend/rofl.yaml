@@ -39,6 +39,27 @@ deployments:
         - any: {}
       fees: endorsing_node
       max_expiration: 3
+    secrets:
+      - name: ADMIN_PRIVATE_KEY
+        value: pGJwa1ggpNOdvuZVYZtve2vumGM4rfnwxq4rbHGewy+lqPRssl5kbmFtZVgh0HWC+eeAyMaQDUANRkSWci08NNgX1nboF7okEw2YfGgHZW5vbmNlTyDNGJdwseKXDV3VVMSmrGV2YWx1ZVhS4n6+Zt9N6Dt23t9OMF+wPJwBCTO29WZXEnLH2iMyhMmDbUOmfVz10HRRTmVyO8KlnVPZysPzDvj2KKL4idTVYb1Cg/Snb9GA4CTjibKxgx+Xug==
+      - name: ADMIN_ADDRESS
+        value: pGJwa1ggfqRoR2cO93VLkd0TE0lA9j/PLS6ONJ3hor///s9Tu0RkbmFtZVgdqknKp+QV9WSCFHMGEtYl1bdVCfsxi4Gx55vDiaJlbm9uY2VPtJ+zVud3q3stzHDTWNO9ZXZhbHVlWDoqLzLe6fPqjrv3ceqd5qJkuECAU9zopV7LtrHyW5zZZkvU5zqS0h1z5WB1O5QGuw4m5F+Dx4ID3CdY
+      - name: RELAYER_PRIVATE_KEY
+        value: pGJwa1ggf3VNwAXdzNisKUnWRnGcqHSgtbYtXB0UNqQtt8lAVVFkbmFtZVgjx4zKMd64kZVNriw9FQxLV5S94lSOcW6QZBerMBMcqaUXRrBlbm9uY2VPq/Y9zTlUMqS/ZnBuWqu5ZXZhbHVlWFL0RSNPtOx8oKGtBkUiIl2ZY4gpUtYjJI3uKVK/LewNP+/0xo/CakcdNJle1RguCsVUnd6H+ZB6MC5Fb6wjx01ih35tb2IAH5KT/anshB3Rop92
+      - name: RELAYER_ADDRESS
+        value: pGJwa1gg3TAtCSGVWbAvATVDgvbKa5TGz/El9aGXeUnk1qyJ5SxkbmFtZVgfDH1anF/eOQcQ2DMaCVTbjDlNPWqa9lHeirZTFa6hUmVub25jZU+jN1Tvj2yY9WCxm707FFhldmFsdWVYOhPDQ0ZMnFLgUQQU4EGfEF0403XjEF8oXicIL01aWeRaE5XfdQYmt3/dukD0KVb+M1An53q1ZI8t8gk=
+      - name: ORACLE_PRIVATE_KEY
+        value: pGJwa1gghj9jBJB7hY2dtRH9ZkOhWxyUAiVsQCnR3mTkBP0hLF9kbmFtZVgiyr/uNH8JBlw0jn2Fq4j8pSx0w0Tl3qqfjATujjDStxS72GVub25jZU+cpGp2pHMI/zvrXNXUha1ldmFsdWVYUh/SeuioJr87ZMqhlR5BjoObKAWyedvhD5vclmgJPTup4bQW/3PqNthya5q7uVZ+J2mbb2qzQndlAm9m2bBK4R119oVPON4eu/v4inhtdC8nQ0s=
+      - name: ORACLE_ADDRESS
+        value: pGJwa1ggJy5W5CBj5VnUrWuTkGp0EE9ynMswrSeNQPbYKAcgdXJkbmFtZVgeoZKPW1ohDgIWVJmnSuIkVJasaCG6Y6v67YBr7g++ZW5vbmNlTwAGOhdC0DTwuwGhbNXiMGV2YWx1ZVg6cX/2xeB6+4wFGro8vCA/BhzVOjFhITaGKj53O0Dj065t5BGLV3AJdD6do/WJQPl1oAgGWQZrQLFp3A==
+      - name: INVOICE_TOKEN_V2_ADDRESS
+        value: pGJwa1ggpjoxg51f3weT4RZjZh9oskSOGAl/Bs+ZS5BXoFAA825kbmFtZVgosXAYt7/Tui5CIJTzaOCiWuCRKzHymmDU+YzCsygdCs1NCh+y7e+zsWVub25jZU8S22FfkeVUaBvV06a15YNldmFsdWVYOnafUbMfBrn22Bvl4B/8z3lEfO24UMc90vKzD/6gVUnqUpvH0uHLLn3Wu9I9tIrTr4JeJOcqsdhFBjE=
+      - name: POOL_V2_ADDRESS
+        value: pGJwa1gg3y3rY/mFReUV/VrbncI+4R3FAcjKzKwpIwH8VVWqqC5kbmFtZVgf56LoAzb71l0iNWnPZdW/dD7J9sN87dl5+Q3Avi9VRWVub25jZU8L10cq0VCZPJsAwIyaZfBldmFsdWVYOpcJoI2TG6v4vVy2gW+Dd+BbVEpflRnwYUjQwNSJ6PtyA4+LVMhfn9cfoG/ljlqTFMnnwYE5CRS3xnM=
+      - name: ZIRCUIT_TESTNET_RPC_URL
+        value: pGJwa1ggO5W75jKcwf87xsGDPXdCm0lmScqqorUFw/WSfVIqpkFkbmFtZVgn3FwqumgJjdQrSRCS9Po3VPKo3bo33xi98bqnVKoKGTv2P4IzU+X0ZW5vbmNlT/BuXAQUtI3wdx0XA7w/Z2V2YWx1ZVg1avTR49hUuPLA7VzsFDtWvpowenC3FbYSglXTxq/8T/yCObPVCUzFV3p/T1k6nwBkVA67FXA=
+      - name: BENEFICIARY_ADDRESS
+        value: pGJwa1gg5jtRMTIjJspabiUS/iWlQ+BBh5cPIxhHuMloJccj7ghkbmFtZVgjIE5+L1Pk/TV9VThx/eRxhDysRS9m97NBP7igxxtPkQgDpQVlbm9uY2VPMqNi4t+Swg2nXl4grR5jZXZhbHVlWDo0tOAqWc2A6RtgZVaz2dgpi/7GTr/L4xZl/HRHq9DovKaxq7S2PWihmIqQjZorQe/vAjUUynGKMIoN
     machines:
       default:
         provider: oasis1qp2ens0hsp7gh23wajxa4hpetkdek3swyyulyrmz
