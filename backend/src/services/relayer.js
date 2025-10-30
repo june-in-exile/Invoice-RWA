@@ -145,12 +145,14 @@ class RelayerService {
     status,
     metadata = {}
   ) {
-    await db.query(
-      `INSERT INTO relayer_transactions 
-       (tx_hash, tx_type, from_address, to_address, status, metadata) 
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [txHash, txType, fromAddress, toAddress, status, JSON.stringify(metadata)]
-    );
+    await db.insert("relayer_transactions", {
+      tx_hash: txHash,
+      tx_type: txType,
+      from_address: fromAddress,
+      to_address: toAddress,
+      status,
+      metadata: JSON.stringify(metadata),
+    });
   }
 
   /**
@@ -163,11 +165,16 @@ class RelayerService {
     gasPrice,
     errorMessage = null
   ) {
-    await db.query(
-      `UPDATE relayer_transactions 
-       SET status = $1, gas_used = $2, gas_price = $3, error_message = $4, confirmed_at = NOW()
-       WHERE tx_hash = $5`,
-      [status, gasUsed?.toString(), gasPrice?.toString(), errorMessage, txHash]
+    await db.update(
+      "relayer_transactions",
+      {
+        status,
+        gas_used: gasUsed?.toString(),
+        gas_price: gasPrice?.toString(),
+        error_message: errorMessage,
+        confirmed_at: new Date().toISOString(),
+      },
+      { tx_hash: txHash }
     );
   }
 
@@ -179,10 +186,11 @@ class RelayerService {
     logger.warn("Alert sent", { type, message });
 
     // 記錄到資料庫
-    await db.query(
-      `INSERT INTO system_logs (level, message, context) VALUES ($1, $2, $3)`,
-      ["alert", message, JSON.stringify({ type })]
-    );
+    await db.insert("system_logs", {
+      level: "alert",
+      message,
+      context: JSON.stringify({ type }),
+    });
   }
 }
 

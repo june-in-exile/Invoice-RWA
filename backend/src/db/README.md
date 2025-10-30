@@ -23,7 +23,7 @@ src/db/
 - 🎯 **統一介面**: 所有資料庫操作使用相同的 API
 - 💾 **交易支援**: 完整的交易管理 (begin, commit, rollback)
 - 🔌 **易於擴展**: 可輕鬆新增其他資料庫類型
-- ⚡ **向後相容**: 現有程式碼無需大幅修改
+- ⚡ **類型安全**: 清晰的介面定義和錯誤處理
 
 ## 快速開始
 
@@ -297,50 +297,37 @@ const db = DatabaseFactory.createDatabase('rofl', {
 });
 ```
 
-## 遷移指南
+## 開發指南
 
-### 從原本的 pool.query() 遷移
+### 查詢資料
 
-**之前:**
+使用抽象化的查詢方法：
+
 ```javascript
-const result = await db.query(
-  'SELECT * FROM users WHERE wallet_address = $1',
-  [walletAddress]
-);
-const user = result.rows[0];
-```
-
-**之後:**
-```javascript
+// 查詢單筆
 const user = await db.findOne('users', {
   wallet_address: walletAddress
 });
+
+// 查詢多筆
+const invoices = await db.findMany('invoices', {
+  where: { lottery_day: '2025-03-25' },
+  orderBy: { created_at: 'DESC' }
+});
 ```
 
-### 從交易遷移
+### 使用交易
 
-**之前:**
-```javascript
-const client = await pool.connect();
-try {
-  await client.query('BEGIN');
-  await client.query('INSERT INTO ...', []);
-  await client.query('COMMIT');
-} catch (error) {
-  await client.query('ROLLBACK');
-} finally {
-  client.release();
-}
-```
-
-**之後:**
 ```javascript
 const transaction = await db.beginTransaction();
+
 try {
-  await transaction.insert('table', data);
+  await transaction.insert('invoices', data);
+  await transaction.update('users', updateData, whereClause);
   await transaction.commit();
 } catch (error) {
   await transaction.rollback();
+  throw error;
 } finally {
   await transaction.release();
 }

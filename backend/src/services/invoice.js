@@ -13,13 +13,8 @@ class InvoiceService {
       const { invoiceNumber, carrierNumber, amount, purchaseDate, lotteryDay } =
         invoiceData;
 
-      // 1. 查詢用戶 config (使用抽象化的 query 方法以支援 ROFL)
-      const userResult = await transaction.query(
-        "SELECT wallet_address, pool_id, donation_percent FROM users WHERE carrier_number = $1",
-        [carrierNumber]
-      );
-
-      const user = userResult.rows?.[0] || (await db.findOne("users", { carrier_number: carrierNumber }));
+      // 1. 查詢用戶 config
+      const user = await db.findOne("users", { carrier_number: carrierNumber });
 
       if (!user) {
         throw new Error(`Carrier ${carrierNumber} not registered`);
