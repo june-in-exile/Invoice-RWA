@@ -175,12 +175,9 @@ contract PoolV2 is AccessControl, ReentrancyGuard {
      */
     function updateMinDonationPercent(uint256 poolId, uint8 _minDonationPercent) 
         external 
+        onlyRole(DEFAULT_ADMIN_ROLE)
     {
         require(pools[poolId].poolId != 0, "Pool does not exist");
-        require(
-            msg.sender == pools[poolId].beneficiary,
-            "Only beneficiary can update"
-        );
         require(
             _minDonationPercent >= 0 && _minDonationPercent <= 100,
             "Invalid donation percent"

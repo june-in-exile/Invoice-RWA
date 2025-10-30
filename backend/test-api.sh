@@ -290,7 +290,75 @@ fi
 echo ""
 
 # =============================================================================
-# Test 8: Get User Invoices (Should be empty)
+# Test 8: Pool Management - Invalid Request (Missing Fields)
+# =============================================================================
+
+print_test "Test Pool API - Missing Fields (Expected to fail)"
+invalid_pool_data='{
+  "minDonationPercent": 30
+}'
+
+invalid_pool_response=$(curl -s -w "\n%{http_code}" -X PUT "${BASE_URL}/api/pools/1/min-donation-percent" \
+  -H "Content-Type: application/json" \
+  -d "$invalid_pool_data")
+
+invalid_pool_code=$(echo "$invalid_pool_response" | tail -n1)
+if [ "$invalid_pool_code" -eq 400 ]; then
+  print_success "Missing signature field correctly rejected (HTTP 400)"
+else
+  print_failure "Missing fields should return 400, got $invalid_pool_code"
+fi
+
+echo ""
+
+# =============================================================================
+# Test 9: Pool Management - Invalid Signature
+# =============================================================================
+
+print_test "Test Pool API - Invalid Signature (Expected to fail)"
+invalid_sig_data='{
+  "minDonationPercent": 30,
+  "signature": "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+}'
+
+invalid_sig_response=$(curl -s -w "\n%{http_code}" -X PUT "${BASE_URL}/api/pools/1/min-donation-percent" \
+  -H "Content-Type: application/json" \
+  -d "$invalid_sig_data")
+
+invalid_sig_code=$(echo "$invalid_sig_response" | tail -n1)
+if [ "$invalid_sig_code" -eq 403 ] || [ "$invalid_sig_code" -eq 500 ]; then
+  print_success "Invalid signature correctly rejected (HTTP $invalid_sig_code)"
+else
+  print_warning "Invalid signature returned HTTP $invalid_sig_code (expected 403 or 500)"
+fi
+
+echo ""
+
+# =============================================================================
+# Test 10: Pool Management - Invalid Percentage Range
+# =============================================================================
+
+print_test "Test Pool API - Invalid Percentage (Expected to fail)"
+invalid_percent_data='{
+  "minDonationPercent": 150,
+  "signature": "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+}'
+
+invalid_percent_response=$(curl -s -w "\n%{http_code}" -X PUT "${BASE_URL}/api/pools/1/min-donation-percent" \
+  -H "Content-Type: application/json" \
+  -d "$invalid_percent_data")
+
+invalid_percent_code=$(echo "$invalid_percent_response" | tail -n1)
+if [ "$invalid_percent_code" -eq 400 ]; then
+  print_success "Invalid percentage range correctly rejected (HTTP 400)"
+else
+  print_failure "Invalid percentage should return 400, got $invalid_percent_code"
+fi
+
+echo ""
+
+# =============================================================================
+# Test 11: Get User Invoices (Should be empty)
 # =============================================================================
 
 invoices_response=$(run_test "Get User Invoices (Empty)" "GET" "/api/invoices/user/$WALLET_ADDRESS" "" 200)
@@ -303,7 +371,7 @@ fi
 echo ""
 
 # =============================================================================
-# Test 9: Invoice Registration (Optional - requires blockchain)
+# Test 12: Invoice Registration (Optional - requires blockchain)
 # =============================================================================
 
 if [ "$SKIP_INVOICE" = false ]; then
@@ -339,7 +407,7 @@ if [ "$SKIP_INVOICE" = false ]; then
   echo ""
 
   # =============================================================================
-  # Test 10: Get User Invoices After Registration
+  # Test 13: Get User Invoices After Registration
   # =============================================================================
 
   if echo "$invoice_response" | grep -q "\"success\".*true"; then
@@ -357,7 +425,7 @@ if [ "$SKIP_INVOICE" = false ]; then
   fi
 
   # =============================================================================
-  # Test 11: Get Invoices by Lottery Day
+  # Test 14: Get Invoices by Lottery Day
   # =============================================================================
 
   lottery_response=$(run_test "Get Invoices by Lottery Day" "GET" "/api/invoices/lottery/$LOTTERY_DAY" "" 200)

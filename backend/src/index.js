@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cron from "node-cron";
 import userRoutes from "./routes/user.js";
 import invoiceRoutes from "./routes/invoice.js";
+import poolRoutes from "./routes/pool.js"; // Import pool routes
 import relayerService from "./services/relayer.js";
 import oracleService from "./services/oracle.js";
 import eventListenerService from "./services/eventListener.js";
@@ -19,6 +20,7 @@ app.use(express.json());
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/invoices", invoiceRoutes);
+app.use("/api/pools", poolRoutes); // Use pool routes
 
 // Health check
 app.get("/health", (req, res) => {

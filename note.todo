@@ -1,5 +1,5 @@
 prompt:
-    ☐ please summarize the change in this commit and generate a proper commit message in one sentence that is less than 20 words
+    ☐ please summarize the change in contract directory and generate a proper commit message in one sentence that is less than 20 words
 
 git:
     feat
@@ -15,15 +15,8 @@ git:
     revert
 
 backend:
+    請更新文檔讓其他開發者知道具體來說要怎麼測試 API
+    test-aip.sh 終於通過了！please summarize the change in contract directory and generate a proper commit message in one sentence that is less than 20 words
 
-    
+
 contract:
-    請在 Pool 合約中允許 pool 的 beneficiary 決定進到這個 pool 的 IVCtoken 的最低捐贈百分比
-    也就是設定該 pool 的 minDonationPercent 並且可以隨時 update
-    根據這個設定，之後 mint 任何 IVCtoken 如果想要將 poolId 設定為這個 pool
-    就需要 donationPercent >= 該 pool 的 minDonationPercent
-    請注意，修改合約時不需要考慮向後兼容性，但如果會破壞掉向後兼容性的部分請幫我標註起來
-
-
-
-    
