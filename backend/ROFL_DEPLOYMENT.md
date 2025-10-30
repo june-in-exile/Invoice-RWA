@@ -140,7 +140,6 @@ oasis rofl secret set GOV_INVOICE_API_URL https://api.einvoice.nat.gov.tw
 oasis rofl secret set GOV_API_KEY your_api_key
 
 # Optional: monitoring
-oasis rofl secret set ALERT_WEBHOOK_URL https://hooks.slack.com/...
 oasis rofl secret set MIN_RELAYER_BALANCE 0.01
 
 # Enable/disable event listener

@@ -83,7 +83,7 @@ oasis rofl secret set ORACLE_PRIVATE_KEY 0x...
 oasis rofl update
 
 # 6. Build and deploy
-oasis rofl build
+docker run --platform linux/amd64 --volume .:/src -it ghcr.io/oasisprotocol/rofl-dev:main oasis rofl build
 oasis rofl deploy
 
 # 7. Monitor

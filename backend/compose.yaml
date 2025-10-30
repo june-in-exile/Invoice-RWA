@@ -54,7 +54,6 @@ services:
       - ENABLE_EVENT_LISTENER=${ENABLE_EVENT_LISTENER:-false}
 
       # Monitoring
-      - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL}
       - MIN_RELAYER_BALANCE=${MIN_RELAYER_BALANCE:-0.01}
 
     # Volume for persistent SQLite database (local testing only)
