@@ -187,7 +187,6 @@ contract Pool is AccessControl, ReentrancyGuard {
 
         // Calculate distribution
         uint256 donationAmount = (prizeAmount * donationPercent) / 100;
-        uint256 totalReward = prizeAmount - donationAmount;
 
         // Note: rewardPerToken needs to be calculated off-chain with totalSupply
         // Record total prize here first, calculate actual distribution later

@@ -66,7 +66,7 @@ contract InvoiceTokenV2 is ERC1155, AccessControl, ReentrancyGuard {
         _grantRole(ORACLE_ROLE, oracle);
     }
 
-    function setPoolContract(address _poolContractAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setPoolContract(address payable _poolContractAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(_poolContractAddress != address(0), "Invalid pool contract address");
         poolContract = PoolV2(_poolContractAddress);
     }
@@ -122,9 +122,9 @@ contract InvoiceTokenV2 is ERC1155, AccessControl, ReentrancyGuard {
         require(to != address(0), "Cannot mint to zero address");
 
         if (poolId != 0) {
-            PoolV2.PoolInfo memory pool = poolContract.pools(poolId);
-            require(pool.poolId != 0, "Pool does not exist");
-            require(donationPercent >= pool.minDonationPercent, "Donation percent too low for this pool");
+            (uint256 pId, , , , , uint8 minDonationPercent, , ,) = poolContract.pools(poolId);
+            require(pId != 0, "Pool does not exist");
+            require(donationPercent >= minDonationPercent, "Donation percent too low for this pool");
         }
 
         uint256 tokenTypeId = createTokenType(donationPercent, poolId, lotteryDay);

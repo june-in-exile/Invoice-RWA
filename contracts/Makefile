@@ -17,6 +17,16 @@ deploy-testnet:
 		--verify \
 		-vvvv
 
+deploy-testnet-2:
+	forge script script/DeployV2.s.sol:DeployV2 \
+		--rpc-url zircuit_testnet \
+		--account testnetKey \
+		--sender $$(cast wallet address --account testnetKey) \
+		--broadcast \
+		--legacy \
+		--verify \
+		-vvvv
+
 build:
 	forge build
 
