@@ -1,5 +1,5 @@
 -- Users 表
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   wallet_address VARCHAR(42) UNIQUE NOT NULL,
   carrier_number VARCHAR(20) UNIQUE NOT NULL,
@@ -9,11 +9,11 @@ CREATE TABLE users (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_users_wallet ON users(wallet_address);
-CREATE INDEX idx_users_carrier ON users(carrier_number);
+CREATE INDEX IF NOT EXISTS idx_users_wallet ON users(wallet_address);
+CREATE INDEX IF NOT EXISTS idx_users_carrier ON users(carrier_number);
 
 -- Invoices 表
-CREATE TABLE invoices (
+CREATE TABLE IF NOT EXISTS invoices (
   id SERIAL PRIMARY KEY,
   invoice_number VARCHAR(20) UNIQUE NOT NULL,
   carrier_number VARCHAR(20) NOT NULL,
@@ -29,46 +29,48 @@ CREATE TABLE invoices (
   claimed BOOLEAN DEFAULT FALSE,
   claimed_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT NOW(),
-  
+
   FOREIGN KEY (carrier_number) REFERENCES users(carrier_number) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_invoices_carrier ON invoices(carrier_number);
-CREATE INDEX idx_invoices_wallet ON invoices(wallet_address);
-CREATE INDEX idx_invoices_pool ON invoices(pool_id);
-CREATE INDEX idx_invoices_lottery_day ON invoices(lottery_day);
-CREATE INDEX idx_invoices_token_type ON invoices(token_type_id);
-CREATE INDEX idx_invoices_drawn ON invoices(drawn);
+CREATE INDEX IF NOT EXISTS idx_invoices_carrier ON invoices(carrier_number);
+CREATE INDEX IF NOT EXISTS idx_invoices_wallet ON invoices(wallet_address);
+CREATE INDEX IF NOT EXISTS idx_invoices_pool ON invoices(pool_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_lottery_day ON invoices(lottery_day);
+CREATE INDEX IF NOT EXISTS idx_invoices_token_type ON invoices(token_type_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_drawn ON invoices(drawn);
 
 -- Pool Invoices 關聯表
-CREATE TABLE pool_invoices (
+-- 注意：主鍵改為 invoice_number，因為同一個 token_type_id 可能對應多張發票
+CREATE TABLE IF NOT EXISTS pool_invoices (
   pool_id INT NOT NULL,
   token_type_id BIGINT NOT NULL,
   invoice_number VARCHAR(20) NOT NULL,
   lottery_day DATE NOT NULL,
   created_at TIMESTAMP DEFAULT NOW(),
-  
-  PRIMARY KEY (pool_id, token_type_id),
+
+  PRIMARY KEY (invoice_number),
   FOREIGN KEY (invoice_number) REFERENCES invoices(invoice_number) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_pool_invoices_lottery ON pool_invoices(pool_id, lottery_day);
+CREATE INDEX IF NOT EXISTS idx_pool_invoices_lottery ON pool_invoices(pool_id, lottery_day);
+CREATE INDEX IF NOT EXISTS idx_pool_token_type ON pool_invoices(pool_id, token_type_id);
 
 -- Token Type Holders (用於快取持有者資訊)
-CREATE TABLE token_holders (
+CREATE TABLE IF NOT EXISTS token_holders (
   token_type_id BIGINT NOT NULL,
   wallet_address VARCHAR(42) NOT NULL,
   balance BIGINT NOT NULL,
   last_updated TIMESTAMP DEFAULT NOW(),
-  
+
   PRIMARY KEY (token_type_id, wallet_address)
 );
 
-CREATE INDEX idx_token_holders_token ON token_holders(token_type_id);
-CREATE INDEX idx_token_holders_wallet ON token_holders(wallet_address);
+CREATE INDEX IF NOT EXISTS idx_token_holders_token ON token_holders(token_type_id);
+CREATE INDEX IF NOT EXISTS idx_token_holders_wallet ON token_holders(wallet_address);
 
 -- System Logs
-CREATE TABLE system_logs (
+CREATE TABLE IF NOT EXISTS system_logs (
   id SERIAL PRIMARY KEY,
   level VARCHAR(20) NOT NULL,
   message TEXT NOT NULL,
@@ -76,11 +78,11 @@ CREATE TABLE system_logs (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_system_logs_level ON system_logs(level);
-CREATE INDEX idx_system_logs_created ON system_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_system_logs_level ON system_logs(level);
+CREATE INDEX IF NOT EXISTS idx_system_logs_created ON system_logs(created_at);
 
 -- Relayer Transactions
-CREATE TABLE relayer_transactions (
+CREATE TABLE IF NOT EXISTS relayer_transactions (
   id SERIAL PRIMARY KEY,
   tx_hash VARCHAR(66) UNIQUE NOT NULL,
   tx_type VARCHAR(50) NOT NULL, -- 'mint', 'claim', 'notify'
@@ -95,6 +97,6 @@ CREATE TABLE relayer_transactions (
   confirmed_at TIMESTAMP
 );
 
-CREATE INDEX idx_relayer_tx_hash ON relayer_transactions(tx_hash);
-CREATE INDEX idx_relayer_tx_status ON relayer_transactions(status);
-CREATE INDEX idx_relayer_tx_type ON relayer_transactions(tx_type);
+CREATE INDEX IF NOT EXISTS idx_relayer_tx_hash ON relayer_transactions(tx_hash);
+CREATE INDEX IF NOT EXISTS idx_relayer_tx_status ON relayer_transactions(status);
+CREATE INDEX IF NOT EXISTS idx_relayer_tx_type ON relayer_transactions(tx_type);

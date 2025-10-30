@@ -98,6 +98,7 @@ ORACLE_PRIVATE_KEY=0x...  # 你的 Oracle 私鑰
 後端需要 Relayer 錢包來 mint NFT，請確保：
 
 1. **生成或匯入錢包**
+
    ```bash
    # 使用 cast 生成新錢包（記下私鑰和地址）
    cast wallet new
@@ -107,13 +108,15 @@ ORACLE_PRIVATE_KEY=0x...  # 你的 Oracle 私鑰
    ```
 
 2. **領取測試網 ETH**
+
    - 訪問 Zircuit Testnet Faucet
    - 輸入 Relayer 錢包地址
    - 領取至少 0.1 ETH
 
 3. **驗證餘額**
+
    ```bash
-   cast balance $RELAYER_ADDRESS --rpc-url https://zircuit1-testnet.p2pify.com
+   cast balance $RELAYER_ADDRESS --rpc-url $ZIRCUIT_TESTNET_RPC_URL
    ```
 
 4. **更新 .env**
@@ -223,6 +226,7 @@ curl http://localhost:3000/api/users/0x1234567890123456789012345678901234567890
 ### 9. 測試發票註冊 (包含 NFT Mint)
 
 **注意：** 這個步驟會在區塊鏈上 mint NFT，需要：
+
 - Relayer 錢包有足夠的 ETH
 - 合約地址正確
 - RPC 連接正常

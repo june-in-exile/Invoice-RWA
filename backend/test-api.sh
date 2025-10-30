@@ -344,7 +344,9 @@ if [ "$SKIP_INVOICE" = false ]; then
 
   if echo "$invoice_response" | grep -q "\"success\".*true"; then
     invoices_after=$(run_test "Get User Invoices (After Registration)" "GET" "/api/invoices/user/$WALLET_ADDRESS" "" 200)
-    invoice_count=$(echo "$invoices_after" | jq '.data | length' 2>/dev/null || echo "0")
+    # Extract only the last line (JSON response) for parsing
+    invoice_json=$(echo "$invoices_after" | tail -n1)
+    invoice_count=$(echo "$invoice_json" | jq '.data | length' 2>/dev/null || echo "0")
 
     if [ "$invoice_count" -gt 0 ]; then
       print_success "User now has $invoice_count invoice(s)"
