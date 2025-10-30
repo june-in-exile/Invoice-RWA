@@ -137,49 +137,73 @@ class EventListenerService {
    */
   async getTokenHolders(tokenTypeId) {
     try {
-      // 先嘗試從資料庫快取讀取
-      const cachedResult = await db.query(
-        `SELECT wallet_address, balance 
-         FROM token_holders 
-         WHERE token_type_id = $1 
-         AND last_updated > NOW() - INTERVAL '1 hour'`,
-        [tokenTypeId]
-      );
+      // 先嘗試從資料庫快取讀取（使用抽象化查詢）
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const cachedHolders = await db.findMany("token_holders", {
+        where: {
+          token_type_id: tokenTypeId,
+          last_updated: { operator: ">", value: oneHourAgo },
+        },
+        select: ["wallet_address", "balance"],
+      });
 
-      if (cachedResult.rows.length > 0) {
+      if (cachedHolders.length > 0) {
         logger.info("Using cached holders", { tokenTypeId });
-        return cachedResult.rows;
+        return cachedHolders;
       }
 
       // 否則從鏈上查詢（透過 event 或 indexer）
       // 這裡簡化為從資料庫查詢所有相關用戶，然後查鏈上餘額
-      const invoicesResult = await db.query(
-        "SELECT DISTINCT wallet_address FROM invoices WHERE token_type_id = $1",
-        [tokenTypeId]
-      );
+      const invoices = await db.findMany("invoices", {
+        where: { token_type_id: tokenTypeId },
+        select: ["wallet_address"],
+      });
+
+      // 取得唯一的錢包地址
+      const uniqueWallets = [
+        ...new Set(invoices.map((inv) => inv.wallet_address)),
+      ];
 
       const holders = [];
 
-      for (const row of invoicesResult.rows) {
+      for (const walletAddress of uniqueWallets) {
         const balance = await invoiceToken.balanceOf(
-          row.wallet_address,
+          walletAddress,
           tokenTypeId
         );
 
         if (balance > 0n) {
           holders.push({
-            wallet_address: row.wallet_address,
+            wallet_address: walletAddress,
             balance: balance.toString(),
           });
 
-          // 更新快取
-          await db.query(
-            `INSERT INTO token_holders (token_type_id, wallet_address, balance, last_updated)
-             VALUES ($1, $2, $3, NOW())
-             ON CONFLICT (token_type_id, wallet_address) 
-             DO UPDATE SET balance = $3, last_updated = NOW()`,
-            [tokenTypeId, row.wallet_address, balance.toString()]
-          );
+          // 更新快取（使用抽象化的 insert/update）
+          const existing = await db.findOne("token_holders", {
+            token_type_id: tokenTypeId,
+            wallet_address: walletAddress,
+          });
+
+          if (existing) {
+            await db.update(
+              "token_holders",
+              {
+                balance: balance.toString(),
+                last_updated: new Date().toISOString(),
+              },
+              {
+                token_type_id: tokenTypeId,
+                wallet_address: walletAddress,
+              }
+            );
+          } else {
+            await db.insert("token_holders", {
+              token_type_id: tokenTypeId,
+              wallet_address: walletAddress,
+              balance: balance.toString(),
+              last_updated: new Date().toISOString(),
+            });
+          }
         }
       }
 
@@ -263,13 +287,18 @@ class EventListenerService {
           gasUsed: receipt.gasUsed.toString(),
         });
 
-        // 更新資料庫
+        // 更新資料庫（使用抽象化的 update）
         for (const holder of batch) {
-          await db.query(
-            `UPDATE invoices 
-             SET claimed = true, claimed_at = NOW() 
-             WHERE token_type_id = $1 AND wallet_address = $2`,
-            [tokenTypeId, holder.wallet_address]
+          await db.update(
+            "invoices",
+            {
+              claimed: true,
+              claimed_at: new Date().toISOString(),
+            },
+            {
+              token_type_id: tokenTypeId,
+              wallet_address: holder.wallet_address,
+            }
           );
         }
 

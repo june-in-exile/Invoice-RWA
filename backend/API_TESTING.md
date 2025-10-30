@@ -104,32 +104,6 @@ curl -X POST http://localhost:3000/api/invoices/batch-register \
   }'
 ```
 
-### Method 3: Using Postman/Insomnia
-
-1. Import the following collection settings:
-
-   - Base URL: `http://localhost:3000`
-   - Content-Type: `application/json`
-
-2. Create requests for each endpoint listed above
-
-### Method 4: Using HTTPie (if installed)
-
-```bash
-# Install httpie
-brew install httpie
-
-# Health check
-http GET localhost:3000/health
-
-# Register user
-http POST localhost:3000/api/users/register \
-  walletAddress="0x1234567890123456789012345678901234567890" \
-  carrierNumber="/ABC1234" \
-  poolId:=1 \
-  donationPercent:=20
-```
-
 ## Testing Workflow
 
 ### Complete Test Flow

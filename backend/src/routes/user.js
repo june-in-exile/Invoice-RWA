@@ -23,24 +23,27 @@ router.post("/register", async (req, res) => {
         .json({ error: "Donation percent must be 20 or 50" });
     }
 
-    // 檢查是否已註冊
-    const existingUser = await db.query(
-      "SELECT * FROM users WHERE wallet_address = $1 OR carrier_number = $2",
-      [walletAddress, carrierNumber]
-    );
+    // 檢查是否已註冊（使用抽象化查詢）
+    const existingByWallet = await db.findOne("users", {
+      wallet_address: walletAddress,
+    });
+    const existingByCarrier = await db.findOne("users", {
+      carrier_number: carrierNumber,
+    });
 
-    if (existingUser.rows.length > 0) {
+    if (existingByWallet || existingByCarrier) {
       return res
         .status(409)
         .json({ error: "Wallet or carrier already registered" });
     }
 
-    // 插入用戶
-    await db.query(
-      `INSERT INTO users (wallet_address, carrier_number, pool_id, donation_percent) 
-       VALUES ($1, $2, $3, $4)`,
-      [walletAddress, carrierNumber, poolId, donationPercent]
-    );
+    // 插入用戶（使用抽象化插入）
+    await db.insert("users", {
+      wallet_address: walletAddress,
+      carrier_number: carrierNumber,
+      pool_id: poolId,
+      donation_percent: donationPercent,
+    });
 
     logger.info("User registered", { walletAddress, carrierNumber });
 
@@ -68,18 +71,17 @@ router.get("/:walletAddress", async (req, res) => {
   try {
     const { walletAddress } = req.params;
 
-    const result = await db.query(
-      "SELECT * FROM users WHERE wallet_address = $1",
-      [walletAddress]
-    );
+    const user = await db.findOne("users", {
+      wallet_address: walletAddress,
+    });
 
-    if (result.rows.length === 0) {
+    if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
     res.json({
       success: true,
-      data: result.rows[0],
+      data: user,
     });
   } catch (error) {
     logger.error("Failed to fetch user", { error: error.message });
@@ -102,33 +104,28 @@ router.put("/:walletAddress", async (req, res) => {
         .json({ error: "Donation percent must be 20 or 50" });
     }
 
-    const updates = [];
-    const values = [];
-    let paramCount = 1;
+    const updateData = {};
 
     if (poolId !== undefined) {
-      updates.push(`pool_id = $${paramCount++}`);
-      values.push(poolId);
+      updateData.pool_id = poolId;
     }
 
     if (donationPercent !== undefined) {
-      updates.push(`donation_percent = $${paramCount++}`);
-      values.push(donationPercent);
+      updateData.donation_percent = donationPercent;
     }
 
-    if (updates.length === 0) {
+    if (Object.keys(updateData).length === 0) {
       return res.status(400).json({ error: "No fields to update" });
     }
 
-    updates.push(`updated_at = NOW()`);
-    values.push(walletAddress);
+    // 使用抽象化的 update 方法
+    const rowsAffected = await db.update("users", updateData, {
+      wallet_address: walletAddress,
+    });
 
-    await db.query(
-      `UPDATE users SET ${updates.join(
-        ", "
-      )} WHERE wallet_address = $${paramCount}`,
-      values
-    );
+    if (rowsAffected === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
     logger.info("User updated", { walletAddress, poolId, donationPercent });
 

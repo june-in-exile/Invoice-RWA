@@ -137,20 +137,21 @@ router.get("/lottery-results", async (req, res) => {
     // 這個 API 僅供 Oracle 使用，實際部署時應加入認證
     // 例如: API Key, IP 白名單等
 
-    const result = await db.query(
-      `SELECT 
-        i.token_type_id,
-        i.pool_id,
-        i.invoice_number,
-        0 as prize_amount
-       FROM invoices i
-       WHERE i.lottery_day = $1 AND i.drawn = false`,
-      [lottery_date]
-    );
+    // 使用抽象化查詢
+    const invoices = await db.findMany("invoices", {
+      where: { lottery_day: lottery_date, drawn: false },
+      select: ["token_type_id", "pool_id", "invoice_number"],
+    });
+
+    // 為相容性加入 prize_amount = 0
+    const results = invoices.map((inv) => ({
+      ...inv,
+      prize_amount: 0,
+    }));
 
     res.json({
       lottery_date,
-      results: result.rows,
+      results,
     });
   } catch (error) {
     logger.error("Failed to fetch lottery results", { error: error.message });

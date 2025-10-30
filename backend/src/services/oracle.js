@@ -47,22 +47,21 @@ class OracleService {
   async queryWinningInvoices(lotteryDate, winningNumbers) {
     const numbersList = winningNumbers.map((w) => w.number);
 
-    const result = await db.query(
-      `SELECT 
-        i.invoice_number,
-        i.token_type_id,
-        i.pool_id,
-        i.wallet_address,
-        i.donation_percent
-       FROM invoices i
-       WHERE i.lottery_day = $1 
-         AND i.invoice_number = ANY($2)
-         AND i.drawn = false`,
-      [lotteryDate, numbersList]
+    // 使用抽象化查詢
+    const allInvoices = await db.findMany("invoices", {
+      where: {
+        lottery_day: lotteryDate,
+        drawn: false,
+      },
+    });
+
+    // 過濾出中獎的發票
+    const winningInvoices = allInvoices.filter((invoice) =>
+      numbersList.includes(invoice.invoice_number)
     );
 
     // 合併中獎金額
-    const invoicesWithPrize = result.rows.map((invoice) => {
+    const invoicesWithPrize = winningInvoices.map((invoice) => {
       const winning = winningNumbers.find(
         (w) => w.number === invoice.invoice_number
       );
@@ -122,12 +121,14 @@ class OracleService {
             txHash: result.txHash,
           });
 
-          // 更新資料庫
-          await db.query(
-            `UPDATE invoices 
-             SET drawn = true, prize_amount = $1 
-             WHERE invoice_number = $2`,
-            [invoice.prizeAmount, invoice.invoice_number]
+          // 更新資料庫（使用抽象化的 update 方法）
+          await db.update(
+            "invoices",
+            {
+              drawn: true,
+              prize_amount: invoice.prizeAmount,
+            },
+            { invoice_number: invoice.invoice_number }
           );
         } catch (error) {
           logger.error("Failed to notify lottery result", {
