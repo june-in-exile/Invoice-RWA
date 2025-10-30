@@ -1,0 +1,76 @@
+# ROFL Application Manifest
+# This file defines the configuration for deploying the Invoice RWA backend to ROFL
+
+# Application metadata
+name: invoice-rwa-backend
+version: 1.0.0
+description: Invoice RWA backend service with SQLite storage
+
+# Container configuration
+container:
+  # Docker image from public registry
+  # Replace with your actual Docker Hub or GitHub Container Registry URL
+  image: docker.io/df41022/invoice-rwa-backend:latest
+
+  # Container registry credentials (if private)
+  # registry_auth:
+  #   username: your-username
+  #   password_secret: registry-password
+
+# Resource allocation
+resources:
+  # Memory in MB (adjust based on your needs)
+  memory: 2048
+
+  # Number of CPU cores
+  cpu: 2
+
+  # Persistent storage in MB (for SQLite database)
+  # This storage will be mounted at /rofl/storage
+  storage: 10240
+
+# Network configuration
+network:
+  # Allow outbound HTTPS connections (for blockchain RPC, APIs)
+  allow_outbound: true
+
+  # Exposed ports
+  ports:
+    - 3000
+
+# Environment variables
+# Note: Sensitive values (private keys) should be set using "oasis rofl secret set"
+environment:
+  NODE_ENV: production
+  PORT: "3000"
+  DB_TYPE: sqlite
+  DB_PATH: /rofl/storage/invoice_rwa.db
+
+  # These will be overridden by secrets set via CLI
+  # RELAYER_PRIVATE_KEY: (set via oasis rofl secret set)
+  # ORACLE_PRIVATE_KEY: (set via oasis rofl secret set)
+  # GOV_API_KEY: (set via oasis rofl secret set)
+
+# Startup configuration
+startup:
+  # Command to run (defaults to CMD in Dockerfile)
+  # command: ["node", "src/index.js"]
+
+  # Health check endpoint
+  healthcheck:
+    path: /health
+    port: 3000
+    interval: 30s
+    timeout: 3s
+    retries: 3
+
+# Deployment policy
+deployment:
+  # Restart policy
+  restart_policy: always
+
+  # Maximum number of restarts
+  max_restarts: 5
+
+  # Restart delay in seconds
+  restart_delay: 10

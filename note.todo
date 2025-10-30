@@ -15,10 +15,16 @@ git:
     revert
 
 backend:
-    ☐ abstract the DB
-    ☐ integrate ROLF into 
+    ✔ Dockerfile @started(25-10-31 01:50) @done(25-10-31 01:50) @lasted(55s)
+    ✔ Compose @done(25-10-31 01:53)
+
+    Now I've containerized the app (backend), plz follow the steps in https://docs.oasis.io/build/rofl/quickstart to ROFLize my app
+
+integrate @backend/.gitignore with @.gitignore
+
     
 contract:
+
 
 
     

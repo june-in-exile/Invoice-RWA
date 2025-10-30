@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import db from "./db.js";
-import { PostgresAdapter } from "./adapters/PostgresAdapter.js";
+import { SQLiteAdapter } from "./adapters/SQLiteAdapter.js";
 import logger from "../utils/logger.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,28 +13,28 @@ async function initDatabase() {
     logger.info("Starting database initialization...");
 
     // Check database type
-    const dbType = process.env.DB_TYPE || "postgres";
+    const dbType = process.env.DB_TYPE || "sqlite";
 
-    if (dbType !== "postgres" && dbType !== "postgresql") {
-      logger.warn(
-        `Database initialization is only supported for PostgreSQL. Current DB_TYPE: ${dbType}`
-      );
-      logger.info(
-        "ROFL storage does not require SQL schema initialization."
-      );
-      process.exit(0);
-    }
-
-    // Verify that db is a PostgreSQL adapter
-    if (!(db instanceof PostgresAdapter)) {
+    if (dbType !== "sqlite") {
       logger.error(
-        "Database is not a PostgreSQL adapter. Schema initialization requires PostgreSQL."
+        `Unsupported database type: ${dbType}. Only 'sqlite' is supported for ROFL deployment.`
       );
       process.exit(1);
     }
 
-    // Read schema file
-    const schemaPath = path.join(__dirname, "schema.sql");
+    // Verify that db is a SQLite adapter
+    if (!(db instanceof SQLiteAdapter)) {
+      logger.error(
+        "Database is not a SQLite adapter. Schema initialization requires SQLite."
+      );
+      process.exit(1);
+    }
+
+    // Connect to database
+    await db.connect();
+
+    // Read SQLite schema file
+    const schemaPath = path.join(__dirname, "schema.sqlite.sql");
 
     if (!fs.existsSync(schemaPath)) {
       logger.error(`Schema file not found: ${schemaPath}`);
@@ -43,11 +43,28 @@ async function initDatabase() {
 
     const schema = fs.readFileSync(schemaPath, "utf8");
 
-    // Execute schema using raw query (PostgreSQL specific)
-    await db.query(schema);
+    // Split schema into individual statements (SQLite executes one statement at a time)
+    const statements = schema
+      .split(";")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+
+    // Execute each statement
+    for (const statement of statements) {
+      try {
+        await db.query(statement);
+      } catch (error) {
+        // Ignore "table already exists" errors
+        if (!error.message.includes("already exists")) {
+          throw error;
+        }
+      }
+    }
 
     logger.info("Database initialized successfully");
-    logger.info("Tables created from schema.sql");
+    logger.info("Tables created from schema.sqlite.sql");
+
+    await db.disconnect();
     process.exit(0);
   } catch (error) {
     logger.error("Failed to initialize database", { error: error.message });
