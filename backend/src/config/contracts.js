@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// ABIs (簡化版，實際使用需要完整 ABI)
+// ABIs (simplified, full ABI is required for actual use)
 const InvoiceTokenABI = [
   "function mint(address to, uint8 donationPercent, uint256 poolId, uint256 lotteryDay, uint256 amount) external returns (uint256)",
   "function balanceOf(address account, uint256 id) external view returns (uint256)",

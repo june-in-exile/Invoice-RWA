@@ -1,8 +1,8 @@
 import { IDatabase, ITransaction } from "../interfaces/IDatabase.js";
 
 /**
- * ROFL Transaction 實作
- * ROFL 使用 key-value 儲存，交易實作較為簡化
+ * ROFL Transaction Implementation
+ * ROFL uses key-value storage, so the transaction implementation is simplified
  */
 class ROFLTransaction extends ITransaction {
   constructor(roflClient) {
@@ -13,7 +13,7 @@ class ROFLTransaction extends ITransaction {
   }
 
   async query(query, params = []) {
-    // ROFL 不支援 SQL 查詢，此方法主要用於相容性
+    // ROFL does not support SQL queries, this method is mainly for compatibility
     throw new Error("ROFL does not support SQL queries. Use insert/update methods instead.");
   }
 
@@ -43,7 +43,7 @@ class ROFLTransaction extends ITransaction {
       where,
     });
 
-    return 1; // 假設更新一筆資料
+    return 1; // Assume one record is updated
   }
 
   async commit() {
@@ -51,7 +51,7 @@ class ROFLTransaction extends ITransaction {
       throw new Error("Transaction is not active");
     }
 
-    // 執行所有操作
+    // Execute all operations
     for (const op of this.operations) {
       if (op.type === "insert") {
         await this.roflClient.insert(op.table, op.data);
@@ -81,23 +81,23 @@ class ROFLTransaction extends ITransaction {
 /**
  * ROFL Storage Adapter
  *
- * ROFL 使用 key-value 儲存模式，與 PostgreSQL 的關聯式資料庫不同
+ * ROFL uses key-value storage mode, which is different from PostgreSQL's relational database
  *
- * 儲存架構：
- * - 每個 table 對應一個 namespace
- * - 每筆記錄使用 unique key (例如：users:{wallet_address})
- * - 索引使用額外的 key-set (例如：users:index:carrier_number:{value})
+ * Storage architecture:
+ * - Each table corresponds to a namespace
+ * - Each record uses a unique key (e.g., users:{wallet_address})
+ * - Indexes use additional key-sets (e.g., users:index:carrier_number:{value})
  *
- * ROFL Storage API (基於文件)：
- * - storage.get(key): 取得資料
- * - storage.set(key, value): 儲存資料
- * - storage.delete(key): 刪除資料
- * - storage.has(key): 檢查是否存在
+ * ROFL Storage API (based on documentation):
+ * - storage.get(key): Get data
+ * - storage.set(key, value): Store data
+ * - storage.delete(key): Delete data
+ * - storage.has(key): Check if exists
  */
 export class ROFLAdapter extends IDatabase {
   constructor(roflClient) {
     super();
-    this.rofl = roflClient; // ROFL SDK 客戶端
+    this.rofl = roflClient; // ROFL SDK client
     this.connected = false;
   }
 
@@ -106,7 +106,7 @@ export class ROFLAdapter extends IDatabase {
       return;
     }
 
-    // 初始化 ROFL 連接
+    // Initialize ROFL connection
     if (this.rofl && typeof this.rofl.connect === "function") {
       await this.rofl.connect();
     }
@@ -122,9 +122,9 @@ export class ROFLAdapter extends IDatabase {
   }
 
   /**
-   * 建構 ROFL storage key
-   * @param {string} table - 表格名稱
-   * @param {string} id - 記錄 ID
+   * Build ROFL storage key
+   * @param {string} table - Table name
+   * @param {string} id - Record ID
    * @returns {string} - ROFL key
    */
   _buildKey(table, id) {
@@ -132,33 +132,33 @@ export class ROFLAdapter extends IDatabase {
   }
 
   /**
-   * 建構索引 key
-   * @param {string} table - 表格名稱
-   * @param {string} field - 欄位名稱
-   * @param {string} value - 欄位值
-   * @returns {string} - 索引 key
+   * Build index key
+   * @param {string} table - Table name
+   * @param {string} field - Field name
+   * @param {string} value - Field value
+   * @returns {string} - Index key
    */
   _buildIndexKey(table, field, value) {
     return `rofl.${table}:index:${field}:${value}`;
   }
 
   /**
-   * 建構列表 key（用於儲存所有記錄的 ID）
-   * @param {string} table - 表格名稱
-   * @returns {string} - 列表 key
+   * Build list key (for storing all record IDs)
+   * @param {string} table - Table name
+   * @returns {string} - List key
    */
   _buildListKey(table) {
     return `rofl.${table}:list`;
   }
 
   /**
-   * 從 where 條件中找出主鍵
-   * @param {string} table - 表格名稱
-   * @param {Object} where - 查詢條件
-   * @returns {string|null} - 主鍵值
+   * Extract primary key from where conditions
+   * @param {string} table - Table name
+   * @param {Object} where - Query conditions
+   * @returns {string|null} - Primary key value
    */
   _extractPrimaryKey(table, where) {
-    // 不同 table 的主鍵不同
+    // Different tables have different primary keys
     const primaryKeyMap = {
       users: "wallet_address",
       invoices: "invoice_number",
@@ -171,7 +171,7 @@ export class ROFLAdapter extends IDatabase {
   }
 
   async query(query, params = []) {
-    // ROFL 不支援原生 SQL 查詢
+    // ROFL does not support raw SQL queries
     throw new Error(
       "ROFL adapter does not support raw SQL queries. Use findOne/findMany/insert/update/delete methods instead."
     );
@@ -190,7 +190,7 @@ export class ROFLAdapter extends IDatabase {
       await this.connect();
     }
 
-    // 嘗試使用主鍵查詢
+    // Try to use primary key query
     const primaryKeyValue = this._extractPrimaryKey(table, where);
     if (primaryKeyValue) {
       const key = this._buildKey(table, primaryKeyValue);
@@ -198,7 +198,7 @@ export class ROFLAdapter extends IDatabase {
       return data ? JSON.parse(data) : null;
     }
 
-    // 使用索引查詢（較慢）
+    // Use index query (slower)
     const results = await this.findMany(table, { where, limit: 1 });
     return results.length > 0 ? results[0] : null;
   }
@@ -210,12 +210,12 @@ export class ROFLAdapter extends IDatabase {
 
     const { where = {}, orderBy, limit, offset = 0 } = options;
 
-    // 取得所有記錄 ID
+    // Get all record IDs
     const listKey = this._buildListKey(table);
     const listData = await this.rofl.storage.get(listKey);
     const allIds = listData ? JSON.parse(listData) : [];
 
-    // 根據 where 條件過濾
+    // Filter based on where conditions
     let results = [];
 
     for (const id of allIds) {
@@ -225,7 +225,7 @@ export class ROFLAdapter extends IDatabase {
       if (data) {
         const record = JSON.parse(data);
 
-        // 檢查是否符合 where 條件
+        // Check if matches where conditions
         const matches = Object.entries(where).every(([field, value]) => {
           if (Array.isArray(value)) {
             return value.includes(record[field]);
@@ -239,7 +239,7 @@ export class ROFLAdapter extends IDatabase {
       }
     }
 
-    // 排序
+    // Sort
     if (orderBy) {
       if (typeof orderBy === "object" && !Array.isArray(orderBy)) {
         // {created_at: 'DESC'}
@@ -253,7 +253,7 @@ export class ROFLAdapter extends IDatabase {
       }
     }
 
-    // 分頁
+    // Pagination
     if (limit !== undefined) {
       results = results.slice(offset, offset + limit);
     } else if (offset > 0) {
@@ -268,16 +268,16 @@ export class ROFLAdapter extends IDatabase {
       await this.connect();
     }
 
-    // 產生或取得主鍵
+    // Generate or get primary key
     const primaryKeyValue = this._extractPrimaryKey(table, data);
     if (!primaryKeyValue) {
       throw new Error(`Cannot determine primary key for table ${table}`);
     }
 
-    // 儲存記錄
+    // Store record
     const key = this._buildKey(table, primaryKeyValue);
 
-    // 加入 created_at 時間戳記
+    // Add created_at timestamp
     const recordData = {
       ...data,
       created_at: data.created_at || new Date().toISOString(),
@@ -285,7 +285,7 @@ export class ROFLAdapter extends IDatabase {
 
     await this.rofl.storage.set(key, JSON.stringify(recordData));
 
-    // 更新列表
+    // Update list
     const listKey = this._buildListKey(table);
     const listData = await this.rofl.storage.get(listKey);
     const allIds = listData ? JSON.parse(listData) : [];
@@ -295,8 +295,8 @@ export class ROFLAdapter extends IDatabase {
       await this.rofl.storage.set(listKey, JSON.stringify(allIds));
     }
 
-    // 建立索引（例如 carrier_number）
-    // 這裡簡化處理，實際應根據 table schema 建立必要索引
+    // Create index (e.g., carrier_number)
+    // Simplified handling here, actual implementation should create necessary indexes based on table schema
     if (table === "users" && data.carrier_number) {
       const indexKey = this._buildIndexKey(
         table,
@@ -323,7 +323,7 @@ export class ROFLAdapter extends IDatabase {
     const existingData = await this.rofl.storage.get(key);
 
     if (!existingData) {
-      return 0; // 記錄不存在
+      return 0; // Record does not exist
     }
 
     const record = JSON.parse(existingData);
@@ -335,7 +335,7 @@ export class ROFLAdapter extends IDatabase {
 
     await this.rofl.storage.set(key, JSON.stringify(updatedRecord));
 
-    return 1; // 更新一筆記錄
+    return 1; // Updated one record
   }
 
   async delete(table, where) {
@@ -357,7 +357,7 @@ export class ROFLAdapter extends IDatabase {
 
     await this.rofl.storage.delete(key);
 
-    // 從列表中移除
+    // Remove from list
     const listKey = this._buildListKey(table);
     const listData = await this.rofl.storage.get(listKey);
     const allIds = listData ? JSON.parse(listData) : [];
@@ -370,8 +370,8 @@ export class ROFLAdapter extends IDatabase {
 }
 
 /**
- * Mock ROFL Client (用於開發測試)
- * 實際部署時應替換為真實的 ROFL SDK
+ * Mock ROFL Client (for development testing)
+ * Should be replaced with the actual ROFL SDK in production deployment
  */
 export class MockROFLClient {
   constructor() {
@@ -387,7 +387,7 @@ export class MockROFLClient {
   }
 }
 
-// 為 Mock client 加入 storage methods
+// Add storage methods to Mock client
 MockROFLClient.prototype.storage = {
   _store: new Map(),
 

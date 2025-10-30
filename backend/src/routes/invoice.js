@@ -6,14 +6,14 @@ const router = express.Router();
 
 /**
  * POST /api/invoices/register
- * 註冊新發票（由加值中心呼叫）
+ * Register new invoice (called by value-added center)
  */
 router.post("/register", async (req, res) => {
   try {
     const { invoiceNumber, carrierNumber, amount, purchaseDate, lotteryDay } =
       req.body;
 
-    // 驗證輸入
+    // Validate input
     if (
       !invoiceNumber ||
       !carrierNumber ||
@@ -24,7 +24,7 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // 註冊發票
+    // Register invoice
     const result = await invoiceService.registerInvoice({
       invoiceNumber,
       carrierNumber,
@@ -51,7 +51,7 @@ router.post("/register", async (req, res) => {
 
 /**
  * POST /api/invoices/batch-register
- * 批量註冊發票
+ * Batch register invoices
  */
 router.post("/batch-register", async (req, res) => {
   try {
@@ -84,7 +84,7 @@ router.post("/batch-register", async (req, res) => {
 
 /**
  * GET /api/invoices/user/:walletAddress
- * 查詢用戶的所有發票
+ * Query all invoices for a user
  */
 router.get("/user/:walletAddress", async (req, res) => {
   try {
@@ -104,7 +104,7 @@ router.get("/user/:walletAddress", async (req, res) => {
 
 /**
  * GET /api/invoices/lottery/:lotteryDay
- * 查詢特定開獎日的發票
+ * Query invoices by lottery day
  */
 router.get("/lottery/:lotteryDay", async (req, res) => {
   try {
@@ -124,7 +124,7 @@ router.get("/lottery/:lotteryDay", async (req, res) => {
 
 /**
  * GET /api/lottery-results
- * Oracle 查詢開獎發票（內部 API）
+ * Oracle query for lottery invoices (internal API)
  */
 router.get("/lottery-results", async (req, res) => {
   try {
@@ -134,16 +134,16 @@ router.get("/lottery-results", async (req, res) => {
       return res.status(400).json({ error: "Missing lottery_date parameter" });
     }
 
-    // 這個 API 僅供 Oracle 使用，實際部署時應加入認證
-    // 例如: API Key, IP 白名單等
+    // This API is for Oracle use only, authentication should be added in production
+    // e.g., API Key, IP whitelist, etc.
 
-    // 使用抽象化查詢
+    // Use abstracted query
     const invoices = await db.findMany("invoices", {
       where: { lottery_day: lottery_date, drawn: false },
       select: ["token_type_id", "pool_id", "invoice_number"],
     });
 
-    // 為相容性加入 prize_amount = 0
+    // Add prize_amount = 0 for compatibility
     const results = invoices.map((inv) => ({
       ...inv,
       prize_amount: 0,

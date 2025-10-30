@@ -7,30 +7,30 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title InvoiceToken (IVC)
- * @notice 統一發票 NFT，相同屬性的發票可批量交易
+ * @notice Uniform Invoice NFT, invoices with same attributes can be traded in batches
  */
 contract InvoiceToken is ERC1155, AccessControl, ReentrancyGuard {
-    
+
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
 
-    // Immutable 屬性（創建後不可變）
+    // Immutable attributes (cannot be changed after creation)
     struct ImmutableData {
-        uint8 donationPercent;      // 捐贈比例 (20 or 50)
+        uint8 donationPercent;      // Donation percentage (20 or 50)
         uint256 poolId;              // Pool ID
-        uint256 lotteryDay;          // 開獎日期 (timestamp)
+        uint256 lotteryDay;          // Lottery day (timestamp)
     }
 
-    // Token Type ID => Immutable 屬性
+    // Token Type ID => Immutable attributes
     mapping(uint256 tokenTypeId => ImmutableData config) private _immutableData;
-    
-    // Token Type ID => 是否已開獎
+
+    // Token Type ID => Whether lottery has been drawn
     mapping(uint256 tokenTypeId => bool isDrawn) public drawn;
-    
-    // Token Type ID => 是否存在
+
+    // Token Type ID => Whether exists
     mapping(uint256 tokenTypeId => bool exists) public tokenTypeExists;
-    
-    // 下一個 Token Type ID
+
+    // Next Token Type ID
     uint256 private _nextTokenTypeId = 1;
 
     // Events
@@ -64,8 +64,8 @@ contract InvoiceToken is ERC1155, AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice 創建新的 token type（如果不存在）
-     * @dev Immutable 屬性創建後無法修改
+     * @notice Create new token type (if it doesn't exist)
+     * @dev Immutable attributes cannot be modified after creation
      */
     function createTokenType(
         uint8 donationPercent,
@@ -78,7 +78,7 @@ contract InvoiceToken is ERC1155, AccessControl, ReentrancyGuard {
         );
         require(lotteryDay > block.timestamp, "Lottery day must be in future");
 
-        // 檢查是否已存在相同屬性的 token type
+        // Check if token type with same attributes already exists
         uint256 existingTypeId = _findTokenType(donationPercent, poolId, lotteryDay);
         if (existingTypeId != 0) {
             return existingTypeId;
@@ -101,7 +101,7 @@ contract InvoiceToken is ERC1155, AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice Mint tokens（自動創建或復用 token type）
+     * @notice Mint tokens (automatically create or reuse token type)
      */
     function mint(
         address to,
@@ -122,7 +122,7 @@ contract InvoiceToken is ERC1155, AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice 批量 mint 不同 token types
+     * @notice Batch mint different token types
      */
     function mintBatch(
         address to,
@@ -144,7 +144,7 @@ contract InvoiceToken is ERC1155, AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice Oracle 標記為已開獎
+     * @notice Oracle marks as lottery drawn
      */
     function markAsDrawn(uint256 tokenTypeId) external onlyRole(ORACLE_ROLE) {
         require(tokenTypeExists[tokenTypeId], "Token type does not exist");
@@ -156,7 +156,7 @@ contract InvoiceToken is ERC1155, AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice 批量標記為已開獎
+     * @notice Batch mark as lottery drawn
      */
     function batchMarkAsDrawn(uint256[] calldata tokenTypeIds) 
         external 
@@ -172,19 +172,19 @@ contract InvoiceToken is ERC1155, AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice 取得 token type 的總供應量
+     * @notice Get token type's total supply
      */
     function totalSupply(uint256 tokenTypeId) external view returns (uint256) {
         require(tokenTypeExists[tokenTypeId], "Token type does not exist");
-        
-        // ERC1155 沒有內建 totalSupply，需要透過 event 追蹤
-        // 或者在合約中維護一個 mapping
-        // 這裡簡化處理，實際使用需要在 Pool 合約透過 indexer 查詢
+
+        // ERC1155 doesn't have built-in totalSupply, needs to be tracked via events
+        // or maintained in a mapping in the contract
+        // Simplified here, actual use requires querying via indexer in Pool contract
         revert("Use indexer to get total supply");
     }
 
     /**
-     * @notice 取得 immutable 屬性
+     * @notice Get immutable attributes
      */
     function getImmutableData(uint256 tokenTypeId) 
         external 
@@ -201,7 +201,7 @@ contract InvoiceToken is ERC1155, AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice 取得完整資訊（immutable + mutable）
+     * @notice Get complete information (immutable + mutable)
      */
     function getTokenTypeData(uint256 tokenTypeId) 
         external 
@@ -224,7 +224,7 @@ contract InvoiceToken is ERC1155, AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice 檢查是否已開獎
+     * @notice Check if lottery has been drawn
      */
     function isDrawn(uint256 tokenTypeId) external view returns (bool) {
         require(tokenTypeExists[tokenTypeId], "Token type does not exist");
@@ -232,14 +232,14 @@ contract InvoiceToken is ERC1155, AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice 更新 metadata URI
+     * @notice Update metadata URI
      */
     function setURI(string memory newuri) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setURI(newuri);
     }
 
     /**
-     * @dev 查找是否存在相同屬性的 token type
+     * @dev Find if token type with same attributes exists
      */
     function _findTokenType(
         uint8 donationPercent,

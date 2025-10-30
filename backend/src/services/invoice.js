@@ -4,7 +4,7 @@ import logger from "../utils/logger.js";
 
 class InvoiceService {
   /**
-   * 註冊新發票並 mint NFT
+   * Register new invoice and mint NFT
    */
   async registerInvoice(invoiceData) {
     const transaction = await db.beginTransaction();
@@ -13,14 +13,14 @@ class InvoiceService {
       const { invoiceNumber, carrierNumber, amount, purchaseDate, lotteryDay } =
         invoiceData;
 
-      // 1. 查詢用戶 config
+      // 1. Query user config
       const user = await db.findOne("users", { carrier_number: carrierNumber });
 
       if (!user) {
         throw new Error(`Carrier ${carrierNumber} not registered`);
       }
 
-      // 2. 儲存發票資訊（token_type_id 先為 null）
+      // 2. Store invoice information (token_type_id is null initially)
       await transaction.insert("invoices", {
         invoice_number: invoiceNumber,
         carrier_number: carrierNumber,
@@ -43,14 +43,14 @@ class InvoiceService {
         lotteryDay
       );
 
-      // 4. 更新 token_type_id
+      // 4. Update token_type_id
       await transaction.update(
         "invoices",
         { token_type_id: mintResult.tokenTypeId },
         { invoice_number: invoiceNumber }
       );
 
-      // 5. 記錄 pool_invoices 關聯
+      // 5. Record pool_invoices association
       await transaction.insert("pool_invoices", {
         pool_id: user.pool_id,
         token_type_id: mintResult.tokenTypeId,
@@ -86,7 +86,7 @@ class InvoiceService {
   }
 
   /**
-   * 批量註冊發票
+   * Batch register invoices
    */
   async batchRegisterInvoices(invoices) {
     const results = [];
@@ -108,10 +108,10 @@ class InvoiceService {
   }
 
   /**
-   * 查詢用戶的發票
+   * Query user's invoices
    */
   async getUserInvoices(walletAddress) {
-    // 使用抽象化的 findMany 方法
+    // Use abstracted findMany method
     return await db.findMany("invoices", {
       where: { wallet_address: walletAddress },
       orderBy: { created_at: "DESC" },
@@ -119,10 +119,10 @@ class InvoiceService {
   }
 
   /**
-   * 查詢特定開獎日的發票
+   * Query invoices by lottery day
    */
   async getInvoicesByLotteryDay(lotteryDay) {
-    // 使用抽象化的 findMany 方法
+    // Use abstracted findMany method
     return await db.findMany("invoices", {
       where: { lottery_day: lotteryDay, drawn: false },
       orderBy: [

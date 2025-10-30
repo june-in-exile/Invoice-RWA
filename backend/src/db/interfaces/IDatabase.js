@@ -1,86 +1,86 @@
 /**
- * 資料庫介面 - 定義所有資料庫操作的統一介面
- * 支援 PostgreSQL 和 ROFL 等不同的儲存後端
+ * Database Interface - Defines unified interface for all database operations
+ * Supports different storage backends like PostgreSQL and ROFL
  */
 export class IDatabase {
   /**
-   * 連接資料庫
+   * Connect to database
    */
   async connect() {
     throw new Error("Method 'connect()' must be implemented");
   }
 
   /**
-   * 關閉資料庫連接
+   * Close database connection
    */
   async disconnect() {
     throw new Error("Method 'disconnect()' must be implemented");
   }
 
   /**
-   * 執行查詢
-   * @param {string} query - 查詢語句
-   * @param {Array} params - 查詢參數
-   * @returns {Promise<Object>} - 查詢結果 {rows: [], rowCount: number}
+   * Execute query
+   * @param {string} query - Query statement
+   * @param {Array} params - Query parameters
+   * @returns {Promise<Object>} - Query result {rows: [], rowCount: number}
    */
   async query(query, params = []) {
     throw new Error("Method 'query()' must be implemented");
   }
 
   /**
-   * 開始交易
-   * @returns {Promise<ITransaction>} - 交易物件
+   * Begin transaction
+   * @returns {Promise<ITransaction>} - Transaction object
    */
   async beginTransaction() {
     throw new Error("Method 'beginTransaction()' must be implemented");
   }
 
   /**
-   * 取得單筆資料
-   * @param {string} table - 表格名稱
-   * @param {Object} where - 查詢條件
-   * @returns {Promise<Object|null>} - 查詢結果
+   * Get single record
+   * @param {string} table - Table name
+   * @param {Object} where - Query conditions
+   * @returns {Promise<Object|null>} - Query result
    */
   async findOne(table, where) {
     throw new Error("Method 'findOne()' must be implemented");
   }
 
   /**
-   * 取得多筆資料
-   * @param {string} table - 表格名稱
-   * @param {Object} options - 查詢選項 {where, orderBy, limit, offset}
-   * @returns {Promise<Array>} - 查詢結果
+   * Get multiple records
+   * @param {string} table - Table name
+   * @param {Object} options - Query options {where, orderBy, limit, offset}
+   * @returns {Promise<Array>} - Query results
    */
   async findMany(table, options = {}) {
     throw new Error("Method 'findMany()' must be implemented");
   }
 
   /**
-   * 插入資料
-   * @param {string} table - 表格名稱
-   * @param {Object} data - 要插入的資料
-   * @returns {Promise<Object>} - 插入的資料（包含 ID）
+   * Insert data
+   * @param {string} table - Table name
+   * @param {Object} data - Data to insert
+   * @returns {Promise<Object>} - Inserted data (including ID)
    */
   async insert(table, data) {
     throw new Error("Method 'insert()' must be implemented");
   }
 
   /**
-   * 更新資料
-   * @param {string} table - 表格名稱
-   * @param {Object} data - 要更新的資料
-   * @param {Object} where - 更新條件
-   * @returns {Promise<number>} - 影響的行數
+   * Update data
+   * @param {string} table - Table name
+   * @param {Object} data - Data to update
+   * @param {Object} where - Update conditions
+   * @returns {Promise<number>} - Number of affected rows
    */
   async update(table, data, where) {
     throw new Error("Method 'update()' must be implemented");
   }
 
   /**
-   * 刪除資料
-   * @param {string} table - 表格名稱
-   * @param {Object} where - 刪除條件
-   * @returns {Promise<number>} - 影響的行數
+   * Delete data
+   * @param {string} table - Table name
+   * @param {Object} where - Delete conditions
+   * @returns {Promise<number>} - Number of affected rows
    */
   async delete(table, where) {
     throw new Error("Method 'delete()' must be implemented");
@@ -88,56 +88,56 @@ export class IDatabase {
 }
 
 /**
- * 交易介面
+ * Transaction Interface
  */
 export class ITransaction {
   /**
-   * 執行查詢
-   * @param {string} query - 查詢語句
-   * @param {Array} params - 查詢參數
-   * @returns {Promise<Object>} - 查詢結果
+   * Execute query
+   * @param {string} query - Query statement
+   * @param {Array} params - Query parameters
+   * @returns {Promise<Object>} - Query result
    */
   async query(query, params = []) {
     throw new Error("Method 'query()' must be implemented");
   }
 
   /**
-   * 插入資料
-   * @param {string} table - 表格名稱
-   * @param {Object} data - 要插入的資料
-   * @returns {Promise<Object>} - 插入的資料
+   * Insert data
+   * @param {string} table - Table name
+   * @param {Object} data - Data to insert
+   * @returns {Promise<Object>} - Inserted data
    */
   async insert(table, data) {
     throw new Error("Method 'insert()' must be implemented");
   }
 
   /**
-   * 更新資料
-   * @param {string} table - 表格名稱
-   * @param {Object} data - 要更新的資料
-   * @param {Object} where - 更新條件
-   * @returns {Promise<number>} - 影響的行數
+   * Update data
+   * @param {string} table - Table name
+   * @param {Object} data - Data to update
+   * @param {Object} where - Update conditions
+   * @returns {Promise<number>} - Number of affected rows
    */
   async update(table, data, where) {
     throw new Error("Method 'update()' must be implemented");
   }
 
   /**
-   * 提交交易
+   * Commit transaction
    */
   async commit() {
     throw new Error("Method 'commit()' must be implemented");
   }
 
   /**
-   * 回滾交易
+   * Rollback transaction
    */
   async rollback() {
     throw new Error("Method 'rollback()' must be implemented");
   }
 
   /**
-   * 釋放交易資源
+   * Release transaction resources
    */
   async release() {
     throw new Error("Method 'release()' must be implemented");

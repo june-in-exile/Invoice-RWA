@@ -1,12 +1,12 @@
 /**
- * SQL 查詢建構工具
- * 用於將抽象的 where 條件轉換為 SQL 查詢
+ * SQL Query Builder Utility
+ * Used to convert abstract where conditions to SQL queries
  */
 
 /**
- * 建構 WHERE 子句
- * @param {Object} where - 條件物件
- * @param {number} startIndex - 參數起始索引
+ * Build WHERE clause
+ * @param {Object} where - Condition object
+ * @param {number} startIndex - Parameter starting index
  * @returns {Object} - {clause: string, values: Array, nextIndex: number}
  */
 export function buildWhereClause(where, startIndex = 1) {
@@ -24,12 +24,12 @@ export function buildWhereClause(where, startIndex = 1) {
     } else if (value === undefined) {
       continue;
     } else if (Array.isArray(value)) {
-      // IN 子句
+      // IN clause
       conditions.push(`${key} = ANY($${paramIndex})`);
       values.push(value);
       paramIndex++;
     } else if (typeof value === "object" && value.operator) {
-      // 支援運算符：{operator: '>', value: 10}
+      // Support operators: {operator: '>', value: 10}
       conditions.push(`${key} ${value.operator} $${paramIndex}`);
       values.push(value.value);
       paramIndex++;
@@ -45,9 +45,9 @@ export function buildWhereClause(where, startIndex = 1) {
 }
 
 /**
- * 建構 ORDER BY 子句
- * @param {Object|Array} orderBy - 排序條件
- * @returns {string} - ORDER BY 子句
+ * Build ORDER BY clause
+ * @param {Object|Array} orderBy - Sort conditions
+ * @returns {string} - ORDER BY clause
  */
 export function buildOrderByClause(orderBy) {
   if (!orderBy) {
@@ -75,10 +75,10 @@ export function buildOrderByClause(orderBy) {
 }
 
 /**
- * 建構 LIMIT/OFFSET 子句
- * @param {number} limit - 限制數量
- * @param {number} offset - 偏移量
- * @returns {string} - LIMIT/OFFSET 子句
+ * Build LIMIT/OFFSET clause
+ * @param {number} limit - Limit count
+ * @param {number} offset - Offset amount
+ * @returns {string} - LIMIT/OFFSET clause
  */
 export function buildLimitOffsetClause(limit, offset) {
   const clauses = [];
@@ -95,9 +95,9 @@ export function buildLimitOffsetClause(limit, offset) {
 }
 
 /**
- * 建構 INSERT 查詢
- * @param {string} table - 表格名稱
- * @param {Object} data - 要插入的資料
+ * Build INSERT query
+ * @param {string} table - Table name
+ * @param {Object} data - Data to insert
  * @returns {Object} - {query: string, values: Array}
  */
 export function buildInsertQuery(table, data) {
@@ -113,10 +113,10 @@ export function buildInsertQuery(table, data) {
 }
 
 /**
- * 建構 UPDATE 查詢
- * @param {string} table - 表格名稱
- * @param {Object} data - 要更新的資料
- * @param {Object} where - 更新條件
+ * Build UPDATE query
+ * @param {string} table - Table name
+ * @param {Object} data - Data to update
+ * @param {Object} where - Update conditions
  * @returns {Object} - {query: string, values: Array}
  */
 export function buildUpdateQuery(table, data, where) {
@@ -136,9 +136,9 @@ export function buildUpdateQuery(table, data, where) {
 }
 
 /**
- * 建構 DELETE 查詢
- * @param {string} table - 表格名稱
- * @param {Object} where - 刪除條件
+ * Build DELETE query
+ * @param {string} table - Table name
+ * @param {Object} where - Delete conditions
  * @returns {Object} - {query: string, values: Array}
  */
 export function buildDeleteQuery(table, where) {
@@ -154,9 +154,9 @@ export function buildDeleteQuery(table, where) {
 }
 
 /**
- * 建構 SELECT 查詢
- * @param {string} table - 表格名稱
- * @param {Object} options - 查詢選項
+ * Build SELECT query
+ * @param {string} table - Table name
+ * @param {Object} options - Query options
  * @returns {Object} - {query: string, values: Array}
  */
 export function buildSelectQuery(table, options = {}) {

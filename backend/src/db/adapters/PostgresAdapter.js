@@ -10,7 +10,7 @@ import {
 const { Pool } = pg;
 
 /**
- * PostgreSQL Transaction 實作
+ * PostgreSQL Transaction Implementation
  */
 class PostgresTransaction extends ITransaction {
   constructor(client) {
@@ -150,7 +150,7 @@ export class PostgresAdapter extends IDatabase {
   }
 
   /**
-   * 取得連接池（用於原有的 pool.connect() 模式）
+   * Get the connection pool (for the original pool.connect() mode)
    */
   getPool() {
     return this.pool;

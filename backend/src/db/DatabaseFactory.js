@@ -6,14 +6,14 @@ dotenv.config();
 
 /**
  * Database Factory
- * 根據配置建立對應的資料庫 adapter
+ * Creates a corresponding database adapter based on the configuration
  */
 export class DatabaseFactory {
   /**
-   * 建立資料庫 adapter
-   * @param {string} type - 資料庫類型 ('postgres' | 'rofl')
-   * @param {Object} config - 資料庫配置
-   * @returns {IDatabase} - 資料庫 adapter 實例
+   * Creates a database adapter
+   * @param {string} type - The database type ('postgres' | 'rofl')
+   * @param {Object} config - The database configuration
+   * @returns {IDatabase} - An instance of the database adapter
    */
   static createDatabase(type = null, config = null) {
     const dbType = type || process.env.DB_TYPE || "postgres";
@@ -25,7 +25,7 @@ export class DatabaseFactory {
         return new PostgresAdapter(dbConfig);
 
       case "rofl":
-        // 如果有提供 ROFL client，使用它；否則使用 Mock client
+        // If a ROFL client is provided, use it; otherwise, use the Mock client
         const roflClient = dbConfig.client || new MockROFLClient();
         return new ROFLAdapter(roflClient);
 
@@ -35,9 +35,9 @@ export class DatabaseFactory {
   }
 
   /**
-   * 取得預設配置
-   * @param {string} type - 資料庫類型
-   * @returns {Object} - 配置物件
+   * Gets the default configuration
+   * @param {string} type - The database type
+   * @returns {Object} - The configuration object
    */
   static getDefaultConfig(type) {
     switch (type.toLowerCase()) {
@@ -62,10 +62,10 @@ export class DatabaseFactory {
 
       case "rofl":
         return {
-          // ROFL 配置（根據實際 SDK 需求調整）
+          // ROFL configuration (adjust according to the actual SDK needs)
           endpoint: process.env.ROFL_ENDPOINT,
           nodeId: process.env.ROFL_NODE_ID,
-          // 實際部署時應提供真實的 ROFL client
+          // A real ROFL client should be provided in actual deployment
           client: null,
         };
 
@@ -76,7 +76,7 @@ export class DatabaseFactory {
 }
 
 /**
- * 建立並匯出預設的資料庫實例
+ * Creates and exports a default database instance
  */
 let defaultDatabase = null;
 

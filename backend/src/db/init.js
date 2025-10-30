@@ -12,7 +12,7 @@ async function initDatabase() {
   try {
     logger.info("Starting database initialization...");
 
-    // 檢查資料庫類型
+    // Check database type
     const dbType = process.env.DB_TYPE || "postgres";
 
     if (dbType !== "postgres" && dbType !== "postgresql") {
@@ -25,7 +25,7 @@ async function initDatabase() {
       process.exit(0);
     }
 
-    // 確認 db 是 PostgreSQL adapter
+    // Verify that db is a PostgreSQL adapter
     if (!(db instanceof PostgresAdapter)) {
       logger.error(
         "Database is not a PostgreSQL adapter. Schema initialization requires PostgreSQL."

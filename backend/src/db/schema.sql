@@ -1,4 +1,4 @@
--- Users 表
+-- Users Table
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   wallet_address VARCHAR(42) UNIQUE NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE INDEX IF NOT EXISTS idx_users_wallet ON users(wallet_address);
 CREATE INDEX IF NOT EXISTS idx_users_carrier ON users(carrier_number);
 
--- Invoices 表
+-- Invoices Table
 CREATE TABLE IF NOT EXISTS invoices (
   id SERIAL PRIMARY KEY,
   invoice_number VARCHAR(20) UNIQUE NOT NULL,
@@ -40,8 +40,8 @@ CREATE INDEX IF NOT EXISTS idx_invoices_lottery_day ON invoices(lottery_day);
 CREATE INDEX IF NOT EXISTS idx_invoices_token_type ON invoices(token_type_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_drawn ON invoices(drawn);
 
--- Pool Invoices 關聯表
--- 注意：主鍵改為 invoice_number，因為同一個 token_type_id 可能對應多張發票
+-- Pool Invoices Association Table
+-- Note: The primary key is changed to invoice_number because the same token_type_id may correspond to multiple invoices
 CREATE TABLE IF NOT EXISTS pool_invoices (
   pool_id INT NOT NULL,
   token_type_id BIGINT NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS pool_invoices (
 CREATE INDEX IF NOT EXISTS idx_pool_invoices_lottery ON pool_invoices(pool_id, lottery_day);
 CREATE INDEX IF NOT EXISTS idx_pool_token_type ON pool_invoices(pool_id, token_type_id);
 
--- Token Type Holders (用於快取持有者資訊)
+-- Token Type Holders (for caching holder information)
 CREATE TABLE IF NOT EXISTS token_holders (
   token_type_id BIGINT NOT NULL,
   wallet_address VARCHAR(42) NOT NULL,

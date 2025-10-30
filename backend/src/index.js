@@ -35,7 +35,7 @@ if (process.env.ENABLE_EVENT_LISTENER !== "false") {
   logger.info("Event listener disabled (ENABLE_EVENT_LISTENER=false)");
 }
 
-// 定時任務：監控 Relayer 餘額（每小時）
+// Scheduled task: Monitor Relayer balance (hourly)
 cron.schedule("0 * * * *", async () => {
   try {
     await relayerService.checkBalance();
@@ -44,10 +44,10 @@ cron.schedule("0 * * * *", async () => {
   }
 });
 
-// 定時任務：處理開獎結果（每天凌晨 2 點）
+// Scheduled task: Process lottery results (daily at 2 AM)
 cron.schedule("0 2 * * *", async () => {
   try {
-    // 處理昨天的開獎
+    // Process yesterday's lottery
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const lotteryDate = yesterday.toISOString().split("T")[0];

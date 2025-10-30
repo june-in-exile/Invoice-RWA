@@ -11,7 +11,7 @@ class RelayerService {
   }
 
   /**
-   * Mint NFT 給用戶
+   * Mint NFT for user
    */
   async mintInvoiceNFT(userAddress, donationPercent, poolId, lotteryDay) {
     try {
@@ -22,10 +22,10 @@ class RelayerService {
         lotteryDay,
       });
 
-      // 檢查 Relayer 餘額
+      // Check Relayer balance
       await this.checkBalance();
 
-      // 執行 mint
+      // Execute mint
       const tx = await invoiceToken.mint(
         userAddress,
         donationPercent,
@@ -39,7 +39,7 @@ class RelayerService {
 
       logger.info("Mint transaction sent", { txHash: tx.hash });
 
-      // 記錄交易
+      // Log transaction
       await this.logTransaction(
         tx.hash,
         "mint",
@@ -48,7 +48,7 @@ class RelayerService {
         "pending"
       );
 
-      // 等待確認
+      // Wait for confirmation
       const receipt = await tx.wait();
 
       logger.info("Mint transaction confirmed", {
@@ -56,7 +56,7 @@ class RelayerService {
         blockNumber: receipt.blockNumber,
       });
 
-      // 更新交易狀態
+      // Update transaction status
       await this.updateTransactionStatus(
         tx.hash,
         "success",
@@ -64,7 +64,7 @@ class RelayerService {
         receipt.gasPrice
       );
 
-      // 從 event 中提取 tokenTypeId
+      // Extract tokenTypeId from event
       const tokenTypeId = this.extractTokenTypeId(receipt);
 
       return {
@@ -91,7 +91,7 @@ class RelayerService {
   }
 
   /**
-   * 從交易 receipt 提取 tokenTypeId
+   * Extract tokenTypeId from transaction receipt
    */
   extractTokenTypeId(receipt) {
     const event = receipt.logs.find((log) => {
@@ -112,7 +112,7 @@ class RelayerService {
   }
 
   /**
-   * 檢查 Relayer 餘額
+   * Check Relayer balance
    */
   async checkBalance() {
     const balance = await provider.getBalance(relayerWallet.address);
@@ -135,7 +135,7 @@ class RelayerService {
   }
 
   /**
-   * 記錄交易到資料庫
+   * Log transaction to database
    */
   async logTransaction(
     txHash,
@@ -156,7 +156,7 @@ class RelayerService {
   }
 
   /**
-   * 更新交易狀態
+   * Update transaction status
    */
   async updateTransactionStatus(
     txHash,
@@ -179,13 +179,13 @@ class RelayerService {
   }
 
   /**
-   * 發送告警
+   * Send alert
    */
   async sendAlert(type, message) {
-    // 實作告警邏輯（Slack, Email, etc.）
+    // Implement alert logic (Slack, Email, etc.)
     logger.warn("Alert sent", { type, message });
 
-    // 記錄到資料庫
+    // Log to database
     await db.insert("system_logs", {
       level: "alert",
       message,

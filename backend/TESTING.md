@@ -1,50 +1,50 @@
-# Invoice RWA Backend - 測試文檔
+# Invoice RWA Backend - Testing Documentation
 
-本文檔說明如何測試 Invoice RWA 後端系統，包括資料庫抽象層的測試。
+This document explains how to test the Invoice RWA backend system, including tests for the database abstraction layer.
 
-## 目錄
+## Table of Contents
 
-- [環境設定](#環境設定)
-- [PostgreSQL 模式測試](#postgresql-模式測試)
-- [ROFL 模式測試](#rofl-模式測試)
-- [API 測試](#api-測試)
-- [整合測試](#整合測試)
-- [常見問題](#常見問題)
+- [Environment Setup](#environment-setup)
+- [PostgreSQL Mode Testing](#postgresql-mode-testing)
+- [ROFL Mode Testing](#rofl-mode-testing)
+- [API Testing](#api-testing)
+- [Integration Testing](#integration-testing)
+- [Frequently Asked Questions](#frequently-asked-questions)
 
 ---
 
-## 環境設定
+## Environment Setup
 
-### 前置需求
+### Prerequisites
 
 - Node.js >= 18
-- PostgreSQL >= 14 (如使用 PostgreSQL 模式)
-- Docker (可選，用於快速啟動 PostgreSQL)
+- PostgreSQL >= 14 (if using PostgreSQL mode)
+- Docker (optional, for quickly starting PostgreSQL)
 
-### 安裝依賴
+### Install Dependencies
 
 ```bash
 cd backend
 npm install
 ```
 
-### 環境變數設定
+### Environment Variable Setup
 
-複製環境變數範例檔案：
+Copy the example environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-編輯 `.env` 設定所需的環境變數。
+Edit `.env` to configure the required environment variables.
 
 ---
 
-## PostgreSQL 模式測試
+## PostgreSQL Mode Testing
 
-### 1. 啟動 PostgreSQL
+### 1. Start PostgreSQL
 
-#### 使用 Docker (推薦)
+#### Using Docker (Recommended)
 
 ```bash
 docker run --name invoice-rwa-postgres \
@@ -54,23 +54,23 @@ docker run --name invoice-rwa-postgres \
   -d postgres:14
 ```
 
-#### 或使用本機 PostgreSQL
+#### Or use local PostgreSQL
 
-確保 PostgreSQL 服務正在運行，並創建資料庫：
+Ensure the PostgreSQL service is running and create the database:
 
 ```bash
 createdb invoice_rwa
 ```
 
-### 2. 設定環境變數
+### 2. Configure Environment Variables
 
-在 `.env` 中設定：
+Set the following in `.env`:
 
 ```bash
-# 資料庫類型
+# Database type
 DB_TYPE=postgres
 
-# PostgreSQL 連接設定
+# PostgreSQL connection settings
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=invoice_rwa
@@ -80,58 +80,58 @@ DB_POOL_MAX=20
 DB_IDLE_TIMEOUT=30000
 DB_CONNECTION_TIMEOUT=2000
 
-# 區塊鏈設定（Zircuit Testnet）
+# Blockchain settings (Zircuit Testnet)
 ZIRCUIT_TESTNET_RPC_URL=https://zircuit1-testnet.p2pify.com
 CHAIN_ID=48899
 
-# 已部署的合約地址（Zircuit Testnet）
+# Deployed contract addresses (Zircuit Testnet)
 INVOICE_TOKEN_ADDRESS=0x0b627dC0ddeD44149b9e5Fb78C43E693de7CB717
 POOL_ADDRESS=0x187a5B23B5552fEFA81D1AFe68626A84694F3510
 
-# Relayer 和 Oracle 私鑰（需要有測試網 ETH）
-RELAYER_PRIVATE_KEY=0x... # 你的 Relayer 私鑰
-ORACLE_PRIVATE_KEY=0x...  # 你的 Oracle 私鑰
+# Relayer and Oracle private keys (require testnet ETH)
+RELAYER_PRIVATE_KEY=0x... # Your Relayer private key
+ORACLE_PRIVATE_KEY=0x...  # Your Oracle private key
 ```
 
-### 3. 準備 Relayer 錢包 (重要！)
+### 3. Prepare Relayer Wallet (Important!)
 
-後端需要 Relayer 錢包來 mint NFT，請確保：
+The backend needs a Relayer wallet to mint NFTs. Please ensure:
 
-1. **生成或匯入錢包**
+1.  **Generate or Import a Wallet**
 
-   ```bash
-   # 使用 cast 生成新錢包（記下私鑰和地址）
-   cast wallet new
+    ```bash
+    # Use cast to generate a new wallet (note down the private key and address)
+    cast wallet new
 
-   # 或使用現有私鑰
-   cast wallet address --private-key $YOUR_PRIVATE_KEY
-   ```
+    # Or use an existing private key
+    cast wallet address --private-key $YOUR_PRIVATE_KEY
+    ```
 
-2. **領取測試網 ETH**
+2.  **Get Testnet ETH**
 
-   - 訪問 Zircuit Testnet Faucet
-   - 輸入 Relayer 錢包地址
-   - 領取至少 0.1 ETH
+    - Visit the Zircuit Testnet Faucet
+    - Enter the Relayer wallet address
+    - Claim at least 0.1 ETH
 
-3. **驗證餘額**
+3.  **Verify Balance**
 
-   ```bash
-   cast balance $RELAYER_ADDRESS --rpc-url $ZIRCUIT_TESTNET_RPC_URL
-   ```
+    ```bash
+    cast balance $RELAYER_ADDRESS --rpc-url $ZIRCUIT_TESTNET_RPC_URL
+    ```
 
-4. **更新 .env**
-   ```bash
-   RELAYER_PRIVATE_KEY=0x你的私鑰
-   RELAYER_ADDRESS=0x你的地址
-   ```
+4.  **Update .env**
+    ```bash
+    RELAYER_PRIVATE_KEY=0xyour_private_key
+    RELAYER_ADDRESS=0xyour_address
+    ```
 
-### 4. 初始化資料庫 Schema
+### 4. Initialize Database Schema
 
 ```bash
 npm run db:init
 ```
 
-預期輸出：
+Expected output:
 
 ```
 [INFO] Starting database initialization...
@@ -139,32 +139,32 @@ npm run db:init
 [INFO] Tables created from schema.sql
 ```
 
-### 5. 啟動後端服務
+### 5. Start the Backend Service
 
 ```bash
 npm run dev
 ```
 
-預期輸出：
+Expected output:
 
 ```
 [INFO] ROFL backend started on port 3000
 [INFO] Environment: development
-[INFO] Relayer address: 0x... (你的 Relayer 地址)
-[INFO] Oracle address: 0x... (你的 Oracle 地址)
+[INFO] Relayer address: 0x... (Your Relayer address)
+[INFO] Oracle address: 0x... (Your Oracle address)
 ```
 
-**如果看到錯誤：** 檢查 `.env` 中的私鑰是否正確設定。
+**If you see an error:** Check if the private keys in `.env` are set correctly.
 
-### 6. 驗證資料庫連接
+### 6. Verify Database Connection
 
-測試健康檢查端點：
+Test the health check endpoint:
 
 ```bash
 curl http://localhost:3000/health
 ```
 
-預期回應：
+Expected response:
 
 ```json
 {
@@ -173,7 +173,7 @@ curl http://localhost:3000/health
 }
 ```
 
-### 7. 測試用戶註冊 (PostgreSQL)
+### 7. Test User Registration (PostgreSQL)
 
 ```bash
 curl -X POST http://localhost:3000/api/users/register \
@@ -186,7 +186,7 @@ curl -X POST http://localhost:3000/api/users/register \
   }'
 ```
 
-預期回應：
+Expected response:
 
 ```json
 {
@@ -201,13 +201,13 @@ curl -X POST http://localhost:3000/api/users/register \
 }
 ```
 
-### 8. 測試用戶查詢
+### 8. Test User Query
 
 ```bash
 curl http://localhost:3000/api/users/0x1234567890123456789012345678901234567890
 ```
 
-預期回應：
+Expected response:
 
 ```json
 {
@@ -223,13 +223,13 @@ curl http://localhost:3000/api/users/0x1234567890123456789012345678901234567890
 }
 ```
 
-### 9. 測試發票註冊 (包含 NFT Mint)
+### 9. Test Invoice Registration (Includes NFT Mint)
 
-**注意：** 這個步驟會在區塊鏈上 mint NFT，需要：
+**Note:** This step will mint an NFT on the blockchain and requires:
 
-- Relayer 錢包有足夠的 ETH
-- 合約地址正確
-- RPC 連接正常
+- The Relayer wallet to have enough ETH
+- Correct contract addresses
+- A working RPC connection
 
 ```bash
 curl -X POST http://localhost:3000/api/invoices/register \
@@ -243,7 +243,7 @@ curl -X POST http://localhost:3000/api/invoices/register \
   }'
 ```
 
-成功回應：
+Successful response:
 
 ```json
 {
@@ -258,52 +258,52 @@ curl -X POST http://localhost:3000/api/invoices/register \
 }
 ```
 
-**可以在區塊瀏覽器查看交易：**
+**You can view the transaction on the block explorer:**
 https://explorer.testnet.zircuit.com/tx/[txHash]
 
-### 10. 驗證 PostgreSQL 資料
+### 10. Verify PostgreSQL Data
 
-連接到 PostgreSQL 並檢查資料：
+Connect to PostgreSQL and check the data:
 
 ```bash
 docker exec -it invoice-rwa-postgres psql -U postgres -d invoice_rwa
 ```
 
-在 psql 中執行：
+In psql, execute:
 
 ```sql
--- 查看所有表格
+-- View all tables
 \dt
 
--- 查看用戶資料
+-- View user data
 SELECT * FROM users;
 
--- 查看發票資料
+-- View invoice data
 SELECT * FROM invoices;
 
--- 退出
+-- Exit
 \q
 ```
 
 ---
 
-## ROFL 模式測試
+## ROFL Mode Testing
 
-ROFL 模式使用 Mock client 進行測試，不需要真實的 ROFL 節點。
+ROFL mode uses a Mock client for testing and does not require a real ROFL node.
 
-### 1. 設定環境變數
+### 1. Configure Environment Variables
 
-在 `.env` 中設定：
+Set the following in `.env`:
 
 ```bash
-# 資料庫類型
+# Database type
 DB_TYPE=rofl
 
-# ROFL 設定（使用 Mock client 時可以留空）
+# ROFL settings (can be left empty when using the Mock client)
 # ROFL_ENDPOINT=
 # ROFL_NODE_ID=
 
-# 其他設定與 PostgreSQL 模式相同
+# Other settings are the same as in PostgreSQL mode
 ZIRCUIT_RPC_URL=https://zircuit1-testnet.p2pify.com
 CHAIN_ID=48899
 INVOICE_TOKEN_ADDRESS=0x...
@@ -312,15 +312,15 @@ RELAYER_PRIVATE_KEY=0x...
 ORACLE_PRIVATE_KEY=0x...
 ```
 
-### 2. 啟動後端服務
+### 2. Start the Backend Service
 
 ```bash
 npm run dev
 ```
 
-**注意：** ROFL 模式不需要執行 `npm run db:init`，因為 ROFL 使用 key-value 儲存，不需要 SQL schema。
+**Note:** ROFL mode does not require running `npm run db:init` because ROFL uses key-value storage and does not need an SQL schema.
 
-### 3. 測試用戶註冊 (ROFL)
+### 3. Test User Registration (ROFL)
 
 ```bash
 curl -X POST http://localhost:3000/api/users/register \
@@ -333,17 +333,17 @@ curl -X POST http://localhost:3000/api/users/register \
   }'
 ```
 
-### 4. 測試用戶查詢 (ROFL)
+### 4. Test User Query (ROFL)
 
 ```bash
 curl http://localhost:3000/api/users/0xabcdefabcdefabcdefabcdefabcdefabcdefabcd
 ```
 
-### 5. 驗證 ROFL 儲存
+### 5. Verify ROFL Storage
 
-由於使用 Mock client，資料存在記憶體中。可以透過 API 查詢驗證。
+Since a Mock client is used, the data is stored in memory. Verification can be done by querying the API.
 
-查看所有用戶的發票：
+View all invoices for a user:
 
 ```bash
 curl http://localhost:3000/api/invoices/user/0xabcdefabcdefabcdefabcdefabcdefabcdefabcd
@@ -351,11 +351,11 @@ curl http://localhost:3000/api/invoices/user/0xabcdefabcdefabcdefabcdefabcdefabc
 
 ---
 
-## API 測試
+## API Testing
 
-### 用戶管理 API
+### User Management API
 
-#### 1. 註冊用戶
+#### 1. Register User
 
 ```bash
 curl -X POST http://localhost:3000/api/users/register \
@@ -368,13 +368,13 @@ curl -X POST http://localhost:3000/api/users/register \
   }'
 ```
 
-#### 2. 查詢用戶
+#### 2. Query User
 
 ```bash
 curl http://localhost:3000/api/users/0x1111111111111111111111111111111111111111
 ```
 
-#### 3. 更新用戶設定
+#### 3. Update User Settings
 
 ```bash
 curl -X PUT http://localhost:3000/api/users/0x1111111111111111111111111111111111111111 \
@@ -385,11 +385,11 @@ curl -X PUT http://localhost:3000/api/users/0x1111111111111111111111111111111111
   }'
 ```
 
-### 發票管理 API
+### Invoice Management API
 
-#### 1. 註冊發票
+#### 1. Register Invoice
 
-**注意：** 此操作會觸發鏈上 mint NFT，需要設定正確的合約地址和 Relayer 私鑰。
+**Note:** This action triggers an on-chain NFT mint and requires correct contract addresses and Relayer private key.
 
 ```bash
 curl -X POST http://localhost:3000/api/invoices/register \
@@ -403,7 +403,7 @@ curl -X POST http://localhost:3000/api/invoices/register \
   }'
 ```
 
-#### 2. 批量註冊發票
+#### 2. Batch Register Invoices
 
 ```bash
 curl -X POST http://localhost:3000/api/invoices/batch-register \
@@ -428,13 +428,13 @@ curl -X POST http://localhost:3000/api/invoices/batch-register \
   }'
 ```
 
-#### 3. 查詢用戶發票
+#### 3. Query User Invoices
 
 ```bash
 curl http://localhost:3000/api/invoices/user/0x1111111111111111111111111111111111111111
 ```
 
-#### 4. 查詢特定開獎日的發票
+#### 4. Query Invoices by Lottery Day
 
 ```bash
 curl http://localhost:3000/api/invoices/lottery/2025-11-25
@@ -442,11 +442,11 @@ curl http://localhost:3000/api/invoices/lottery/2025-11-25
 
 ---
 
-## 整合測試
+## Integration Testing
 
-### 完整流程測試腳本
+### Full Flow Test Script
 
-創建測試腳本 `test-flow.sh`：
+Create a test script `test-flow.sh`:
 
 ```bash
 #!/bin/bash
@@ -460,12 +460,12 @@ CARRIER_NUMBER="TEST123456"
 echo "=== Invoice RWA Backend Integration Test ==="
 echo ""
 
-# 1. 健康檢查
+# 1. Health Check
 echo "1. Testing health check..."
 curl -s $BASE_URL/health | jq .
 echo ""
 
-# 2. 註冊用戶
+# 2. Register User
 echo "2. Registering user..."
 curl -s -X POST $BASE_URL/api/users/register \
   -H "Content-Type: application/json" \
@@ -477,12 +477,12 @@ curl -s -X POST $BASE_URL/api/users/register \
   }" | jq .
 echo ""
 
-# 3. 查詢用戶
+# 3. Fetch User
 echo "3. Fetching user..."
 curl -s $BASE_URL/api/users/$WALLET_ADDRESS | jq .
 echo ""
 
-# 4. 更新用戶
+# 4. Update User
 echo "4. Updating user..."
 curl -s -X PUT $BASE_URL/api/users/$WALLET_ADDRESS \
   -H "Content-Type: application/json" \
@@ -492,12 +492,12 @@ curl -s -X PUT $BASE_URL/api/users/$WALLET_ADDRESS \
   }' | jq .
 echo ""
 
-# 5. 驗證更新
+# 5. Verify Update
 echo "5. Verifying update..."
 curl -s $BASE_URL/api/users/$WALLET_ADDRESS | jq .
 echo ""
 
-# 6. 查詢用戶發票（應該是空的）
+# 6. Fetch User Invoices (should be empty)
 echo "6. Fetching user invoices..."
 curl -s $BASE_URL/api/invoices/user/$WALLET_ADDRESS | jq .
 echo ""
@@ -505,28 +505,28 @@ echo ""
 echo "=== Test completed successfully! ==="
 ```
 
-執行測試：
+Execute the test:
 
 ```bash
 chmod +x test-flow.sh
 ./test-flow.sh
 ```
 
-### 效能測試
+### Performance Testing
 
-使用 `ab` (Apache Bench) 進行簡單的效能測試：
+Use `ab` (Apache Bench) for simple performance testing:
 
 ```bash
-# 測試健康檢查端點
+# Test health check endpoint
 ab -n 1000 -c 10 http://localhost:3000/health
 
-# 測試用戶查詢端點
+# Test user query endpoint
 ab -n 100 -c 5 http://localhost:3000/api/users/0x1111111111111111111111111111111111111111
 ```
 
-### 使用 k6 進行負載測試
+### Load Testing with k6
 
-創建 `load-test.js`：
+Create `load-test.js`:
 
 ```javascript
 import http from "k6/http";
@@ -538,13 +538,13 @@ export const options = {
 };
 
 export default function () {
-  // 健康檢查
+  // Health check
   const healthRes = http.get("http://localhost:3000/health");
   check(healthRes, {
     "health check status is 200": (r) => r.status === 200,
   });
 
-  // 查詢用戶
+  // Query user
   const userRes = http.get(
     "http://localhost:3000/api/users/0x1111111111111111111111111111111111111111"
   );
@@ -557,7 +557,7 @@ export default function () {
 }
 ```
 
-執行負載測試：
+Run the load test:
 
 ```bash
 k6 run load-test.js
@@ -565,11 +565,11 @@ k6 run load-test.js
 
 ---
 
-## 資料庫抽象層測試
+## Database Abstraction Layer Testing
 
-### 單元測試範例
+### Unit Test Example
 
-創建 `test-db-abstraction.js`：
+Create `test-db-abstraction.js`:
 
 ```javascript
 import { DatabaseFactory } from "./src/db/DatabaseFactory.js";
@@ -588,7 +588,7 @@ async function testPostgreSQLAdapter() {
 
   await db.connect();
 
-  // 測試 insert
+  // Test insert
   const user = await db.insert("users", {
     wallet_address: "0xtest123",
     carrier_number: "TEST001",
@@ -597,13 +597,13 @@ async function testPostgreSQLAdapter() {
   });
   console.log("✓ Insert successful:", user);
 
-  // 測試 findOne
+  // Test findOne
   const found = await db.findOne("users", {
     wallet_address: "0xtest123",
   });
   console.log("✓ FindOne successful:", found);
 
-  // 測試 update
+  // Test update
   const updated = await db.update(
     "users",
     { donation_percent: 50 },
@@ -611,13 +611,13 @@ async function testPostgreSQLAdapter() {
   );
   console.log("✓ Update successful, rows affected:", updated);
 
-  // 測試 findMany
+  // Test findMany
   const users = await db.findMany("users", {
     where: { pool_id: 1 },
   });
   console.log("✓ FindMany successful, found:", users.length);
 
-  // 清理測試資料
+  // Clean up test data
   await db.delete("users", { wallet_address: "0xtest123" });
   console.log("✓ Delete successful");
 
@@ -635,7 +635,7 @@ async function testROFLAdapter() {
 
   await db.connect();
 
-  // 測試 insert
+  // Test insert
   const user = await db.insert("users", {
     wallet_address: "0xrofl123",
     carrier_number: "ROFL001",
@@ -644,13 +644,13 @@ async function testROFLAdapter() {
   });
   console.log("✓ Insert successful:", user);
 
-  // 測試 findOne
+  // Test findOne
   const found = await db.findOne("users", {
     wallet_address: "0xrofl123",
   });
   console.log("✓ FindOne successful:", found);
 
-  // 測試 update
+  // Test update
   const updated = await db.update(
     "users",
     { donation_percent: 20 },
@@ -658,7 +658,7 @@ async function testROFLAdapter() {
   );
   console.log("✓ Update successful, rows affected:", updated);
 
-  // 測試 findMany
+  // Test findMany
   const users = await db.findMany("users", {
     where: { pool_id: 2 },
   });
@@ -683,42 +683,36 @@ async function runTests() {
 runTests();
 ```
 
-執行測試：
-
-```bash
-node test-db-abstraction.js
-```
-
 ---
 
-## 常見問題
+## Frequently Asked Questions
 
-### PostgreSQL 模式
+### PostgreSQL Mode
 
-#### Q: 資料庫連接失敗
+#### Q: Database connection failed
 
-**錯誤訊息：**
+**Error message:**
 
 ```
 Error: connect ECONNREFUSED 127.0.0.1:5432
 ```
 
-**解決方案：**
+**Solution:**
 
-1. 確認 PostgreSQL 服務正在運行
-2. 檢查 `.env` 中的資料庫設定
-3. 確認防火牆設定
+1.  Confirm the PostgreSQL service is running.
+2.  Check the database settings in `.env`.
+3.  Check firewall settings.
 
-#### Q: Schema 初始化失敗
+#### Q: Schema initialization failed
 
-**錯誤訊息：**
+**Error message:**
 
 ```
 Error: relation "users" already exists
 ```
 
-**解決方案：**
-刪除現有資料庫並重新初始化：
+**Solution:**
+Drop the existing database and re-initialize it:
 
 ```bash
 docker exec -it invoice-rwa-postgres psql -U postgres -c "DROP DATABASE invoice_rwa;"
@@ -726,52 +720,52 @@ docker exec -it invoice-rwa-postgres psql -U postgres -c "CREATE DATABASE invoic
 npm run db:init
 ```
 
-### ROFL 模式
+### ROFL Mode
 
-#### Q: ROFL 模式啟動失敗
+#### Q: ROFL mode failed to start
 
-**錯誤訊息：**
+**Error message:**
 
 ```
 Error: ROFL adapter does not support raw SQL queries
 ```
 
-**解決方案：**
-確保程式碼使用抽象化的 API（`findOne`, `insert` 等），而非原始 SQL 查詢。
+**Solution:**
+Ensure the code uses the abstracted API (`findOne`, `insert`, etc.) instead of raw SQL queries.
 
-#### Q: 資料不持久化
+#### Q: Data is not persistent
 
-**說明：**
-ROFL Mock client 將資料存在記憶體中，重啟後會遺失。
+**Explanation:**
+The ROFL Mock client stores data in memory, which is lost on restart.
 
-**解決方案：**
+**Solution:**
 
-- 開發環境：這是預期行為
-- 生產環境：整合真實的 Oasis ROFL SDK
+-   Development environment: This is the expected behavior.
+-   Production environment: Integrate the real Oasis ROFL SDK.
 
-### API 測試
+### API Testing
 
-#### Q: 發票註冊失敗
+#### Q: Invoice registration failed
 
-**錯誤訊息：**
+**Error message:**
 
 ```
 Error: Carrier not registered
 ```
 
-**解決方案：**
-在註冊發票前，先註冊對應的用戶（carrier_number）。
+**Solution:**
+Register the corresponding user (carrier_number) before registering an invoice.
 
-#### Q: NFT mint 失敗
+#### Q: NFT mint failed
 
-**錯誤訊息：**
+**Error message:**
 
 ```
 Error: insufficient funds for gas
 ```
 
-**解決方案：**
+**Solution:**
 
-1. 確認 Relayer 錢包有足夠的測試幣
-2. 從 Zircuit testnet faucet 領取測試幣
-3. 檢查 `RELAYER_PRIVATE_KEY` 設定是否正確
+1.  Ensure the Relayer wallet has enough testnet currency.
+2.  Get testnet currency from the Zircuit testnet faucet.
+3.  Check if the `RELAYER_PRIVATE_KEY` is set correctly.

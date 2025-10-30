@@ -6,13 +6,13 @@ const router = express.Router();
 
 /**
  * POST /api/users/register
- * 註冊用戶（綁定錢包、載具、設定 config）
+ * Register user (bind wallet, carrier, set config)
  */
 router.post("/register", async (req, res) => {
   try {
     const { walletAddress, carrierNumber, poolId, donationPercent } = req.body;
 
-    // 驗證輸入
+    // Validate input
     if (!walletAddress || !carrierNumber || !poolId || !donationPercent) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -23,7 +23,7 @@ router.post("/register", async (req, res) => {
         .json({ error: "Donation percent must be 20 or 50" });
     }
 
-    // 檢查是否已註冊（使用抽象化查詢）
+    // Check if already registered (using abstracted query)
     const existingByWallet = await db.findOne("users", {
       wallet_address: walletAddress,
     });
@@ -37,7 +37,7 @@ router.post("/register", async (req, res) => {
         .json({ error: "Wallet or carrier already registered" });
     }
 
-    // 插入用戶（使用抽象化插入）
+    // Insert user (using abstracted insert)
     await db.insert("users", {
       wallet_address: walletAddress,
       carrier_number: carrierNumber,
@@ -65,7 +65,7 @@ router.post("/register", async (req, res) => {
 
 /**
  * GET /api/users/:walletAddress
- * 查詢用戶資訊
+ * Query user information
  */
 router.get("/:walletAddress", async (req, res) => {
   try {
@@ -91,7 +91,7 @@ router.get("/:walletAddress", async (req, res) => {
 
 /**
  * PUT /api/users/:walletAddress
- * 更新用戶設定
+ * Update user settings
  */
 router.put("/:walletAddress", async (req, res) => {
   try {
@@ -118,7 +118,7 @@ router.put("/:walletAddress", async (req, res) => {
       return res.status(400).json({ error: "No fields to update" });
     }
 
-    // 使用抽象化的 update 方法
+    // Use abstracted update method
     const rowsAffected = await db.update("users", updateData, {
       wallet_address: walletAddress,
     });

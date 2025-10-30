@@ -15,7 +15,7 @@ class EventListenerService {
   }
 
   /**
-   * 開始監聽 Pool 合約的 LotteryResultNotified event
+   * Start listening to Pool contract's LotteryResultNotified event
    */
   async startListening() {
     if (this.isListening) {
@@ -26,7 +26,7 @@ class EventListenerService {
     this.isListening = true;
     logger.info("Starting event listener for LotteryResultNotified");
 
-    // 監聽 LotteryResultNotified event
+    // Listen to LotteryResultNotified event
     poolContract.on(
       "LotteryResultNotified",
       async (
@@ -65,7 +65,7 @@ class EventListenerService {
   }
 
   /**
-   * 停止監聽
+   * Stop listening
    */
   stopListening() {
     poolContract.removeAllListeners("LotteryResultNotified");
@@ -74,7 +74,7 @@ class EventListenerService {
   }
 
   /**
-   * 處理 LotteryResultNotified event
+   * Handle LotteryResultNotified event
    */
   async handleLotteryResultNotified(
     tokenTypeId,
@@ -83,7 +83,7 @@ class EventListenerService {
     donationAmount
   ) {
     try {
-      // 1. 查詢所有持有該 tokenTypeId 的用戶
+      // 1. Query all users holding this tokenTypeId
       const holders = await this.getTokenHolders(tokenTypeId);
 
       if (holders.length === 0) {
@@ -96,13 +96,13 @@ class EventListenerService {
         holdersCount: holders.length,
       });
 
-      // 2. 計算總供應量
+      // 2. Calculate total supply
       const totalSupply = holders.reduce(
         (sum, holder) => sum + BigInt(holder.balance),
         0n
       );
 
-      // 3. 計算每個 token 的獎金
+      // 3. Calculate reward per token
       const rewardAmount = totalAmount - donationAmount;
       const rewardPerToken = rewardAmount / totalSupply;
 
@@ -113,13 +113,13 @@ class EventListenerService {
         rewardPerToken: ethers.formatEther(rewardPerToken),
       });
 
-      // 4. 更新鏈上的 rewardPerToken
+      // 4. Update rewardPerToken on-chain
       await this.updateRewardPerToken(tokenTypeId, rewardPerToken);
 
-      // 5. 批量 claim（Push 模式）
+      // 5. Batch claim (Push mode)
       await this.batchClaimRewards(tokenTypeId, holders, rewardPerToken);
 
-      // 6. 標記為已分配
+      // 6. Mark as distributed
       await this.markAsDistributed(tokenTypeId);
 
       logger.info("Lottery result handled successfully", { tokenTypeId });
@@ -133,11 +133,11 @@ class EventListenerService {
   }
 
   /**
-   * 取得 token 持有者（從鏈上或快取）
+   * Get token holders (from chain or cache)
    */
   async getTokenHolders(tokenTypeId) {
     try {
-      // 先嘗試從資料庫快取讀取（使用抽象化查詢）
+      // Try to read from database cache first (using abstracted query)
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
       const cachedHolders = await db.findMany("token_holders", {
         where: {
@@ -152,14 +152,14 @@ class EventListenerService {
         return cachedHolders;
       }
 
-      // 否則從鏈上查詢（透過 event 或 indexer）
-      // 這裡簡化為從資料庫查詢所有相關用戶，然後查鏈上餘額
+      // Otherwise query from chain (via event or indexer)
+      // Simplified here to query all related users from database, then check on-chain balance
       const invoices = await db.findMany("invoices", {
         where: { token_type_id: tokenTypeId },
         select: ["wallet_address"],
       });
 
-      // 取得唯一的錢包地址
+      // Get unique wallet addresses
       const uniqueWallets = [
         ...new Set(invoices.map((inv) => inv.wallet_address)),
       ];
@@ -178,7 +178,7 @@ class EventListenerService {
             balance: balance.toString(),
           });
 
-          // 更新快取（使用抽象化的 insert/update）
+          // Update cache (using abstracted insert/update)
           const existing = await db.findOne("token_holders", {
             token_type_id: tokenTypeId,
             wallet_address: walletAddress,
@@ -223,7 +223,7 @@ class EventListenerService {
   }
 
   /**
-   * 更新鏈上的 rewardPerToken
+   * Update rewardPerToken on-chain
    */
   async updateRewardPerToken(tokenTypeId, rewardPerToken) {
     try {
@@ -256,7 +256,7 @@ class EventListenerService {
   }
 
   /**
-   * 批量 claim 獎金（Push 模式）
+   * Batch claim rewards (Push mode)
    */
   async batchClaimRewards(tokenTypeId, holders, rewardPerToken) {
     try {
@@ -287,7 +287,7 @@ class EventListenerService {
           gasUsed: receipt.gasUsed.toString(),
         });
 
-        // 更新資料庫（使用抽象化的 update）
+        // Update database (using abstracted update)
         for (const holder of batch) {
           await db.update(
             "invoices",
@@ -302,7 +302,7 @@ class EventListenerService {
           );
         }
 
-        // 避免 RPC rate limit
+        // Avoid RPC rate limit
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 
@@ -317,7 +317,7 @@ class EventListenerService {
   }
 
   /**
-   * 標記為已分配
+   * Mark as distributed
    */
   async markAsDistributed(tokenTypeId) {
     try {

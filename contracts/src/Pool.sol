@@ -7,46 +7,46 @@ import "./InvoiceToken.sol";
 
 /**
  * @title Pool
- * @notice 管理慈善池、中獎分潤、獎金發放
+ * @notice Manage charity pools, lottery prize distribution, and reward payouts
  */
 contract Pool is AccessControl, ReentrancyGuard {
-    
+
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
     bytes32 public constant CLAIM_OPERATOR_ROLE = keccak256("CLAIM_OPERATOR_ROLE");
 
     InvoiceToken public immutable invoiceToken;
 
-    // Pool 資訊
+    // Pool information
     struct PoolInfo {
         uint256 poolId;
-        address beneficiary;        // 基金會地址
-        string name;                // 基金會名稱
-        uint256 lotteryMonth;       // 開獎月份 (2 or 4)
-        bool active;                // 是否啟用
-        uint256 totalDonationReceived;  // 累計收到的捐款
-        uint256 pendingDonation;    // 待提領的捐款
-        uint256 lastWithdrawAt;     // 上次提領時間
+        address beneficiary;        // Foundation address
+        string name;                // Foundation name
+        uint256 lotteryMonth;       // Lottery month (2 or 4)
+        bool active;                // Whether active
+        uint256 totalDonationReceived;  // Total donations received
+        uint256 pendingDonation;    // Pending donations to withdraw
+        uint256 lastWithdrawAt;     // Last withdrawal time
     }
 
-    // 中獎資訊
+    // Prize information
     struct PrizeInfo {
-        uint256 totalAmount;        // 總中獎金額
-        uint256 donationAmount;     // 捐款金額
-        uint256 rewardPerToken;     // 每個 token 的獎金
-        bool distributed;           // 是否已分配
-        uint256 distributedAt;      // 分配時間
+        uint256 totalAmount;        // Total prize amount
+        uint256 donationAmount;     // Donation amount
+        uint256 rewardPerToken;     // Reward per token
+        bool distributed;           // Whether distributed
+        uint256 distributedAt;      // Distribution time
     }
 
-    // Pool ID => Pool 資訊
+    // Pool ID => Pool information
     mapping(uint256 poolId => PoolInfo info) public pools;
-    
-    // Token Type ID => 中獎資訊
+
+    // Token Type ID => Prize information
     mapping(uint256 tokenTypeId => PrizeInfo prize) public prizes;
-    
-    // User => Token Type ID => 是否已領取
+
+    // User => Token Type ID => Whether claimed
     mapping(address user => mapping(uint256 tokenTypeId => bool claimed)) public claimed;
 
-    // 已註冊的 Pool IDs
+    // Registered Pool IDs
     uint256[] public poolIds;
 
     // Events
@@ -101,7 +101,7 @@ contract Pool is AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice 註冊新的 Pool
+     * @notice Register new Pool
      */
     function registerPool(
         uint256 poolId,
@@ -133,7 +133,7 @@ contract Pool is AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice 更新 Pool 受益地址
+     * @notice Update Pool beneficiary address
      */
     function updateBeneficiary(uint256 poolId, address newBeneficiary) 
         external 
@@ -148,7 +148,7 @@ contract Pool is AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice 停用 Pool
+     * @notice Deactivate Pool
      */
     function deactivatePool(uint256 poolId) 
         external 
@@ -163,8 +163,8 @@ contract Pool is AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice Oracle 通知中獎結果
-     * @dev 計算分潤並記錄
+     * @notice Oracle notify lottery result
+     * @dev Calculate distribution and record
      */
     function notifyLotteryResult(
         uint256 tokenTypeId,
@@ -174,35 +174,35 @@ contract Pool is AccessControl, ReentrancyGuard {
         require(!prizes[tokenTypeId].distributed, "Already distributed");
         require(prizeAmount > 0, "Prize amount must be positive");
 
-        // 取得 token type 屬性
+        // Get token type attributes
         (
             uint8 donationPercent,
             uint256 poolId,
-            
+
         ) = invoiceToken.getImmutableData(tokenTypeId);
 
-        // 驗證 Pool 存在且啟用
+        // Verify Pool exists and is active
         require(pools[poolId].poolId != 0, "Pool does not exist");
         require(pools[poolId].active, "Pool is not active");
 
-        // 計算分配
+        // Calculate distribution
         uint256 donationAmount = (prizeAmount * donationPercent) / 100;
         uint256 totalReward = prizeAmount - donationAmount;
 
-        // 注意：rewardPerToken 需要鏈下計算 totalSupply
-        // 這裡先記錄總獎金，實際分配時再計算
+        // Note: rewardPerToken needs to be calculated off-chain with totalSupply
+        // Record total prize here first, calculate actual distribution later
         prizes[tokenTypeId] = PrizeInfo({
             totalAmount: prizeAmount,
             donationAmount: donationAmount,
-            rewardPerToken: 0, // 需要鏈下計算後更新
+            rewardPerToken: 0, // Needs to be updated after off-chain calculation
             distributed: false,
             distributedAt: 0
         });
 
-        // 更新 Pool 的待提領捐款
+        // Update Pool's pending donations
         pools[poolId].pendingDonation += donationAmount;
 
-        // 通知 InvoiceToken 標記為已開獎
+        // Notify InvoiceToken to mark as drawn
         invoiceToken.markAsDrawn(tokenTypeId);
 
         emit LotteryResultNotified(
@@ -210,12 +210,12 @@ contract Pool is AccessControl, ReentrancyGuard {
             poolId,
             prizeAmount,
             donationAmount,
-            0 // rewardPerToken 待更新
+            0 // rewardPerToken to be updated
         );
     }
 
     /**
-     * @notice 更新每個 token 的獎金（由 ROFL 計算後呼叫）
+     * @notice Update reward per token (called after ROFL calculation)
      */
     function updateRewardPerToken(
         uint256 tokenTypeId,
@@ -229,7 +229,7 @@ contract Pool is AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice 用戶領取獎金（或 Relayer 代領）
+     * @notice User claim reward (or claimed by Relayer)
      */
     function claimReward(address user, uint256 tokenTypeId) 
         public 
@@ -250,7 +250,7 @@ contract Pool is AccessControl, ReentrancyGuard {
 
         claimed[user][tokenTypeId] = true;
 
-        // 轉帳獎金給用戶
+        // Transfer reward to user
         (bool success, ) = payable(user).call{value: reward}("");
         require(success, "Transfer failed");
 
@@ -258,7 +258,7 @@ contract Pool is AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice 批量領取獎金（Relayer 用於 Push 模式）
+     * @notice Batch claim rewards (Relayer for Push mode)
      */
     function batchClaimReward(
         address[] calldata users,
@@ -270,7 +270,7 @@ contract Pool is AccessControl, ReentrancyGuard {
             address user = users[i];
             uint256 tokenTypeId = tokenTypeIds[i];
 
-            // 跳過已領取或無餘額的
+            // Skip if already claimed or no balance
             if (claimed[user][tokenTypeId]) continue;
             if (invoiceToken.balanceOf(user, tokenTypeId) == 0) continue;
             if (prizes[tokenTypeId].rewardPerToken == 0) continue;
@@ -290,7 +290,7 @@ contract Pool is AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice 標記為已分配（在批量 claim 後）
+     * @notice Mark as distributed (after batch claim)
      */
     function markAsDistributed(uint256 tokenTypeId) 
         external 
@@ -304,7 +304,7 @@ contract Pool is AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice 基金會提領捐款
+     * @notice Foundation withdraw donations
      */
     function withdrawDonation(uint256 poolId) 
         external 
@@ -330,7 +330,7 @@ contract Pool is AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice 查詢用戶可領取的獎金
+     * @notice Query user's claimable reward
      */
     function getClaimableReward(address user, uint256 tokenTypeId) 
         external 
@@ -345,14 +345,14 @@ contract Pool is AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice 查詢所有 Pool IDs
+     * @notice Query all Pool IDs
      */
     function getAllPoolIds() external view returns (uint256[] memory) {
         return poolIds;
     }
 
     /**
-     * @notice 接收 ETH/BNB
+     * @notice Receive ETH/BNB
      */
     receive() external payable {}
 }

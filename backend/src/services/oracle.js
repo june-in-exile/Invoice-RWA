@@ -10,11 +10,11 @@ class OracleService {
   }
 
   /**
-   * 從政府 API 取得開獎結果
+   * Fetch lottery results from government API
    */
   async fetchLotteryResults(lotteryDate) {
     try {
-      // 實際 API 呼叫邏輯（依照財政部 API 規格）
+      // Actual API call logic (according to Ministry of Finance API specification)
       const response = await axios.get(`${this.govApiUrl}/lottery`, {
         params: {
           date: lotteryDate,
@@ -22,7 +22,7 @@ class OracleService {
         },
       });
 
-      // 假設回應格式：
+      // Assumed response format:
       // {
       //   "lotteryDate": "2025-03-25",
       //   "winningNumbers": [
@@ -42,12 +42,12 @@ class OracleService {
   }
 
   /**
-   * 查詢 ROFL 資料庫中的中獎發票
+   * Query winning invoices in ROFL database
    */
   async queryWinningInvoices(lotteryDate, winningNumbers) {
     const numbersList = winningNumbers.map((w) => w.number);
 
-    // 使用抽象化查詢
+    // Use abstracted query
     const allInvoices = await db.findMany("invoices", {
       where: {
         lottery_day: lotteryDate,
@@ -55,12 +55,12 @@ class OracleService {
       },
     });
 
-    // 過濾出中獎的發票
+    // Filter out winning invoices
     const winningInvoices = allInvoices.filter((invoice) =>
       numbersList.includes(invoice.invoice_number)
     );
 
-    // 合併中獎金額
+    // Merge prize amount
     const invoicesWithPrize = winningInvoices.map((invoice) => {
       const winning = winningNumbers.find(
         (w) => w.number === invoice.invoice_number
@@ -75,13 +75,13 @@ class OracleService {
   }
 
   /**
-   * 處理開獎結果並上鏈
+   * Process lottery results and submit to chain
    */
   async processLotteryResults(lotteryDate) {
     try {
       logger.info("Processing lottery results", { lotteryDate });
 
-      // 1. 從政府 API 取得開獎結果
+      // 1. Fetch lottery results from government API
       const winningNumbers = await this.fetchLotteryResults(lotteryDate);
 
       if (!winningNumbers || winningNumbers.length === 0) {
@@ -91,7 +91,7 @@ class OracleService {
 
       logger.info("Winning numbers fetched", { count: winningNumbers.length });
 
-      // 2. 查詢資料庫中的中獎發票
+      // 2. Query winning invoices in database
       const winningInvoices = await this.queryWinningInvoices(
         lotteryDate,
         winningNumbers
@@ -104,7 +104,7 @@ class OracleService {
 
       logger.info("Winning invoices found", { count: winningInvoices.length });
 
-      // 3. 逐一通知鏈上合約
+      // 3. Notify on-chain contract one by one
       const results = [];
 
       for (const invoice of winningInvoices) {
@@ -121,7 +121,7 @@ class OracleService {
             txHash: result.txHash,
           });
 
-          // 更新資料庫（使用抽象化的 update 方法）
+          // Update database (using abstracted update method)
           await db.update(
             "invoices",
             {
@@ -165,7 +165,7 @@ class OracleService {
   }
 
   /**
-   * 通知鏈上合約中獎結果
+   * Notify on-chain contract of lottery result
    */
   async notifyLotteryResult(tokenTypeId, prizeAmount) {
     try {
