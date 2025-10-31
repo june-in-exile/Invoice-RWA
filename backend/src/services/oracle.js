@@ -1,4 +1,4 @@
-import { pool as poolContract, oracleWallet } from "../config/contracts.js";
+import { poolV2 as poolContract, oracleWallet } from "../config/contracts.js";
 import db from "../db/db.js";
 import logger from "../utils/logger.js";
 import axios from "axios";

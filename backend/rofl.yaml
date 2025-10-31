@@ -53,13 +53,15 @@ deployments:
       - name: ORACLE_ADDRESS
         value: pGJwa1ggJy5W5CBj5VnUrWuTkGp0EE9ynMswrSeNQPbYKAcgdXJkbmFtZVgeoZKPW1ohDgIWVJmnSuIkVJasaCG6Y6v67YBr7g++ZW5vbmNlTwAGOhdC0DTwuwGhbNXiMGV2YWx1ZVg6cX/2xeB6+4wFGro8vCA/BhzVOjFhITaGKj53O0Dj065t5BGLV3AJdD6do/WJQPl1oAgGWQZrQLFp3A==
       - name: INVOICE_TOKEN_V2_ADDRESS
-        value: pGJwa1ggpjoxg51f3weT4RZjZh9oskSOGAl/Bs+ZS5BXoFAA825kbmFtZVgosXAYt7/Tui5CIJTzaOCiWuCRKzHymmDU+YzCsygdCs1NCh+y7e+zsWVub25jZU8S22FfkeVUaBvV06a15YNldmFsdWVYOnafUbMfBrn22Bvl4B/8z3lEfO24UMc90vKzD/6gVUnqUpvH0uHLLn3Wu9I9tIrTr4JeJOcqsdhFBjE=
+        value: pGJwa1gg1fuUROCdWMH/ZuY7GooEg9WX851wbEqJU0K179O3Ui5kbmFtZVgo6zqZlJPV4ANhPvNecdd2o3NQcad6vN/h0ivBLo/Z5ZLv/eg/bDXHnWVub25jZU+3xSuS6VClAq7VxV7wYoJldmFsdWVYOsuVeqn32hMBRYTaxMyT3AUQzEj/S8yYw1hLw6Q3GJzMOjZVoTUO9UhOcbycFSxFNfEpVLzQnMld3Vo=
       - name: POOL_V2_ADDRESS
-        value: pGJwa1gg3y3rY/mFReUV/VrbncI+4R3FAcjKzKwpIwH8VVWqqC5kbmFtZVgf56LoAzb71l0iNWnPZdW/dD7J9sN87dl5+Q3Avi9VRWVub25jZU8L10cq0VCZPJsAwIyaZfBldmFsdWVYOpcJoI2TG6v4vVy2gW+Dd+BbVEpflRnwYUjQwNSJ6PtyA4+LVMhfn9cfoG/ljlqTFMnnwYE5CRS3xnM=
+        value: pGJwa1ggad6ahwym6vd86VwXUhXHZQzq+/BIbVcL7wAWY4FF4hRkbmFtZVgfEoXZzqmV1YC8vjUto2/JDHIraIajmoA/ARiMZF/TWmVub25jZU+zwwJAw8mbu74KjvgsmolldmFsdWVYOkyVMzWXPWTnUOTNlmv1/VztocqphlVwGYazsCUQvudOI0lGUuOgadKfxUBXAgoD+NGt22BggmhOPVU=
       - name: ZIRCUIT_TESTNET_RPC_URL
         value: pGJwa1ggO5W75jKcwf87xsGDPXdCm0lmScqqorUFw/WSfVIqpkFkbmFtZVgn3FwqumgJjdQrSRCS9Po3VPKo3bo33xi98bqnVKoKGTv2P4IzU+X0ZW5vbmNlT/BuXAQUtI3wdx0XA7w/Z2V2YWx1ZVg1avTR49hUuPLA7VzsFDtWvpowenC3FbYSglXTxq/8T/yCObPVCUzFV3p/T1k6nwBkVA67FXA=
       - name: BENEFICIARY_ADDRESS
         value: pGJwa1gg5jtRMTIjJspabiUS/iWlQ+BBh5cPIxhHuMloJccj7ghkbmFtZVgjIE5+L1Pk/TV9VThx/eRxhDysRS9m97NBP7igxxtPkQgDpQVlbm9uY2VPMqNi4t+Swg2nXl4grR5jZXZhbHVlWDo0tOAqWc2A6RtgZVaz2dgpi/7GTr/L4xZl/HRHq9DovKaxq7S2PWihmIqQjZorQe/vAjUUynGKMIoN
+      - name: CHAIN_ID
+        value: pGJwa1gg8t45RSoyqb9d3g+u9Akh59EbCjU8Jgw/6V2pNrgQ4ktkbmFtZVgYB6tQe+XQFcg1ihN8gI69w/vSNT3ZMXfRZW5vbmNlT7JWeIDoLeMUUd1e5KE+tmV2YWx1ZVV+8fEc4NzfeMw7HrgGhFlGcagrLqA=
     machines:
       default:
         provider: oasis1qp2ens0hsp7gh23wajxa4hpetkdek3swyyulyrmz

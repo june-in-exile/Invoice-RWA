@@ -15,6 +15,21 @@ git:
     revert
 
 backend:
-    please summarize the change in contract directory and generate a proper commit message in one sentence that is less than 20 words
+    please summarize the change in this directory and generate a proper commit message in one sentence that is less than 20 words
 
 contract:
+
+    curl https://p3000.m942.opf-testnet-rofl-25.rofl.app/health
+
+echo -n "0xEA045e3bf79147304f1263aC26AE2a74b5cBD819" | oasis rofl secret set INVOICE_TOKEN_V2_ADDRESS - --force
+echo -n "0xE6843c2E5997ccF10b31D43218dDdFa383aB303a" | oasis rofl secret set POOL_V2_ADDRESS - --force
+echo -n "48898" | oasis rofl secret set CHAIN_ID - --force
+echo -n "https://zircuit-garfield.liquify.com" | oasis rofl secret set ZIRCUIT_TESTNET_RPC_URL -
+echo -n "my-secret-token" | oasis rofl secret set TOKEN -
+echo -n "my-secret-token" | oasis rofl secret set TOKEN -
+echo -n "my-secret-token" | oasis rofl secret set TOKEN -
+echo -n "my-secret-token" | oasis rofl secret set TOKEN -
+echo -n "my-secret-token" | oasis rofl secret set TOKEN -
+
+
+oasis rofl secret set CHAIN_ID 

@@ -5,6 +5,9 @@ import cron from "node-cron";
 import userRoutes from "./routes/user.js";
 import invoiceRoutes from "./routes/invoice.js";
 import poolRoutes from "./routes/pool.js"; // Import pool routes
+import rewardsRoutes from "./routes/rewards.js";
+import tokenRoutes from "./routes/tokens.js";
+import adminRoutes from "./routes/admin.js";
 import relayerService from "./services/relayer.js";
 import oracleService from "./services/oracle.js";
 import eventListenerService from "./services/eventListener.js";
@@ -34,6 +37,9 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/pools", poolRoutes); // Use pool routes
+app.use("/api/rewards", rewardsRoutes);
+app.use("/api/tokens", tokenRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Health check
 app.get("/health", (req, res) => {

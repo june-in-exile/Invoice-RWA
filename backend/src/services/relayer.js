@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { invoiceToken, relayerWallet, provider } from "../config/contracts.js";
+import { invoiceTokenV2, relayerWallet, provider } from "../config/contracts.js";
 import db from "../db/db.js";
 import logger from "../utils/logger.js";
 
@@ -26,7 +26,7 @@ class RelayerService {
       await this.checkBalance();
 
       // Execute mint
-      const tx = await invoiceToken.mint(
+      const tx = await invoiceTokenV2.mint(
         userAddress,
         donationPercent,
         poolId,
@@ -96,7 +96,7 @@ class RelayerService {
   extractTokenTypeId(receipt) {
     const event = receipt.logs.find((log) => {
       try {
-        const parsed = invoiceToken.interface.parseLog(log);
+        const parsed = invoiceTokenV2.interface.parseLog(log);
         return parsed.name === "TokensMinted";
       } catch {
         return false;
@@ -104,7 +104,7 @@ class RelayerService {
     });
 
     if (event) {
-      const parsed = invoiceToken.interface.parseLog(event);
+      const parsed = invoiceTokenV2.interface.parseLog(event);
       return parsed.args.tokenTypeId.toString();
     }
 

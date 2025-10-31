@@ -1,10 +1,10 @@
 import { ethers } from "ethers";
 import {
-  pool as poolContract,
+  poolV2 as poolContract,
   provider,
-  invoiceToken,
+  invoiceTokenV2 as invoiceToken,
 } from "../config/contracts.js";
-import { pool as poolContractWithRelayer } from "../config/contracts.js";
+
 import db from "../db/db.js";
 import logger from "../utils/logger.js";
 import relayerService from "./relayer.js";

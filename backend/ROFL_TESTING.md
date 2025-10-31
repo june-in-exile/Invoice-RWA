@@ -17,6 +17,7 @@ curl https://p3000.m942.opf-testnet-rofl-25.rofl.app/health
 ```
 
 **Expected Response:**
+
 ```json
 {
   "status": "healthy",
@@ -42,6 +43,7 @@ curl -X POST https://p3000.m942.opf-testnet-rofl-25.rofl.app/api/users/register 
 ```
 
 **Expected Response:**
+
 ```json
 {
   "success": true,
@@ -93,6 +95,7 @@ curl -X POST https://p3000.m942.opf-testnet-rofl-25.rofl.app/api/invoices/regist
 ```
 
 **Expected Response:**
+
 ```json
 {
   "success": true,
@@ -190,6 +193,7 @@ oasis rofl machine exec -- sqlite3 /rofl/storage/invoice_rwa.db ".tables"
 ```
 
 **Expected Output:**
+
 ```
 invoices        lottery_results  users
 ```
@@ -264,6 +268,7 @@ oasis rofl machine show
 ```
 
 This displays:
+
 - Machine ID
 - API endpoint
 - Status (running, stopped, etc.)
@@ -322,11 +327,13 @@ BASE_URL="https://p3000.m942.opf-testnet-rofl-25.rofl.app"
 If the health check fails:
 
 1. Check machine status:
+
    ```bash
    oasis rofl machine show
    ```
 
 2. Check application logs for errors:
+
    ```bash
    oasis rofl machine logs --tail 100
    ```
@@ -341,6 +348,7 @@ If the health check fails:
 If you see database-related errors:
 
 1. Check if database file exists:
+
    ```bash
    oasis rofl machine exec -- ls -lh /rofl/storage/invoice_rwa.db
    ```
@@ -362,8 +370,8 @@ oasis rofl machine logs --tail 200 | grep -i "config\|env"
 If secrets are missing, set them:
 
 ```bash
-oasis rofl secret set RELAYER_PRIVATE_KEY 0x...
-oasis rofl secret set ORACLE_PRIVATE_KEY 0x...
+echo -n "0x..." | oasis rofl secret set RELAYER_PRIVATE_KEY -
+echo -n "0x..." | oasis rofl secret set ORACLE_PRIVATE_KEY -
 oasis rofl update
 ```
 
@@ -372,11 +380,13 @@ oasis rofl update
 If you can't connect to the API:
 
 1. Verify the endpoint is correct:
+
    ```bash
    oasis rofl machine show | grep Endpoint
    ```
 
 2. Check if the machine is in "running" state:
+
    ```bash
    oasis rofl machine show | grep Status
    ```
@@ -404,11 +414,13 @@ Recommended testing sequence:
 For ongoing monitoring, you can:
 
 1. Set up periodic health checks:
+
    ```bash
    watch -n 30 curl -s https://p3000.m942.opf-testnet-rofl-25.rofl.app/health
    ```
 
 2. Monitor logs continuously:
+
    ```bash
    oasis rofl machine logs --follow
    ```
