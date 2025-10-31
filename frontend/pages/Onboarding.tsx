@@ -11,7 +11,7 @@ const { useIsActive, useAccount } = hooks;
 
 // --- Zircuit 網路參數 (Added) ---
 // 這是 Zircuit Testnet 的 EIP-3085 參數
-// Chain ID 48899 (十進位) = 0xBF13 (十六進位)
+// Chain ID 48899 (十進位)
 const zircuitTestnetParams = {
   // 使用數字型別以符合 web3-react v8 的 AddEthereumChainParameter 定義
   // 十進位 Chain ID = 48899 (0xBF13)
