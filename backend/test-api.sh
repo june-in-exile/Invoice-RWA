@@ -192,7 +192,7 @@ user_data="{
   \"walletAddress\": \"$WALLET_ADDRESS\",
   \"carrierNumber\": \"$CARRIER_NUMBER\",
   \"poolId\": 1,
-  \"donationPercent\": 20
+  \"donationPercent\": 50
 }"
 
 register_response=$(run_test "Register User" "POST" "/api/users/register" "$user_data" 200)
@@ -213,8 +213,8 @@ if echo "$user_response" | grep -q "\"wallet_address\".*\"$WALLET_ADDRESS\""; th
   print_success "User info retrieved successfully"
 
   # Verify data
-  if echo "$user_response" | grep -q "\"donation_percent\".*20"; then
-    print_success "User data is correct (donation_percent: 20)"
+  if echo "$user_response" | grep -q "\"donation_percent\".*50"; then
+    print_success "User data is correct (donation_percent: 50)"
   else
     print_failure "User data verification failed"
   fi
@@ -256,7 +256,107 @@ fi
 echo ""
 
 # =============================================================================
-# Test 6: Duplicate User Registration (Should Fail)
+# Test 6: Donation Percent Validation - Below Minimum (Should Fail)
+# =============================================================================
+
+print_test "Test Donation Percent Below 25% (Expected to fail)"
+invalid_donation_data="{
+  \"walletAddress\": \"0x9999999999999999999999999999999999999999\",
+  \"carrierNumber\": \"/TESTLOW\",
+  \"poolId\": 1,
+  \"donationPercent\": 20
+}"
+
+invalid_donation_response=$(curl -s -w "\n%{http_code}" -X POST "${BASE_URL}/api/users/register" \
+  -H "Content-Type: application/json" \
+  -d "$invalid_donation_data")
+
+invalid_donation_code=$(echo "$invalid_donation_response" | tail -n1)
+if [ "$invalid_donation_code" -eq 400 ]; then
+  print_success "Donation percent below 25% correctly rejected (HTTP 400)"
+else
+  print_failure "Donation percent below 25% should return 400, got $invalid_donation_code"
+fi
+
+echo ""
+
+# =============================================================================
+# Test 7: Donation Percent Validation - At Minimum (Should Pass)
+# =============================================================================
+
+print_test "Test Donation Percent at 25% (Expected to pass)"
+min_donation_data="{
+  \"walletAddress\": \"0x8888888888888888888888888888888888888888\",
+  \"carrierNumber\": \"/TESTMIN\",
+  \"poolId\": 1,
+  \"donationPercent\": 25
+}"
+
+min_donation_response=$(curl -s -w "\n%{http_code}" -X POST "${BASE_URL}/api/users/register" \
+  -H "Content-Type: application/json" \
+  -d "$min_donation_data")
+
+min_donation_code=$(echo "$min_donation_response" | tail -n1)
+if [ "$min_donation_code" -eq 200 ]; then
+  print_success "Donation percent at 25% correctly accepted (HTTP 200)"
+else
+  print_failure "Donation percent at 25% should return 200, got $min_donation_code"
+fi
+
+echo ""
+
+# =============================================================================
+# Test 8: Donation Percent Validation - Custom Value (Should Pass)
+# =============================================================================
+
+print_test "Test Donation Percent at 35% (Expected to pass)"
+custom_donation_data="{
+  \"walletAddress\": \"0x7777777777777777777777777777777777777777\",
+  \"carrierNumber\": \"/TESTCUSTOM\",
+  \"poolId\": 1,
+  \"donationPercent\": 35
+}"
+
+custom_donation_response=$(curl -s -w "\n%{http_code}" -X POST "${BASE_URL}/api/users/register" \
+  -H "Content-Type: application/json" \
+  -d "$custom_donation_data")
+
+custom_donation_code=$(echo "$custom_donation_response" | tail -n1)
+if [ "$custom_donation_code" -eq 200 ]; then
+  print_success "Custom donation percent (35%) correctly accepted (HTTP 200)"
+else
+  print_failure "Custom donation percent should return 200, got $custom_donation_code"
+fi
+
+echo ""
+
+# =============================================================================
+# Test 9: Donation Percent Validation - Above Maximum (Should Fail)
+# =============================================================================
+
+print_test "Test Donation Percent Above 100% (Expected to fail)"
+high_donation_data="{
+  \"walletAddress\": \"0x6666666666666666666666666666666666666666\",
+  \"carrierNumber\": \"/TESTHIGH\",
+  \"poolId\": 1,
+  \"donationPercent\": 101
+}"
+
+high_donation_response=$(curl -s -w "\n%{http_code}" -X POST "${BASE_URL}/api/users/register" \
+  -H "Content-Type: application/json" \
+  -d "$high_donation_data")
+
+high_donation_code=$(echo "$high_donation_response" | tail -n1)
+if [ "$high_donation_code" -eq 400 ]; then
+  print_success "Donation percent above 100% correctly rejected (HTTP 400)"
+else
+  print_failure "Donation percent above 100% should return 400, got $high_donation_code"
+fi
+
+echo ""
+
+# =============================================================================
+# Test 10: Duplicate User Registration (Should Fail)
 # =============================================================================
 
 print_test "Test Duplicate User Registration (Expected to fail)"
@@ -274,7 +374,7 @@ fi
 echo ""
 
 # =============================================================================
-# Test 7: Get Non-existent User (Should Return 404)
+# Test 11: Get Non-existent User (Should Return 404)
 # =============================================================================
 
 print_test "Test Get Non-existent User (Expected to fail)"
@@ -290,7 +390,7 @@ fi
 echo ""
 
 # =============================================================================
-# Test 8: Pool Management - Invalid Request (Missing Fields)
+# Test 12: Pool Management - Invalid Request (Missing Fields)
 # =============================================================================
 
 print_test "Test Pool API - Missing Fields (Expected to fail)"
@@ -312,7 +412,7 @@ fi
 echo ""
 
 # =============================================================================
-# Test 9: Pool Management - Invalid Signature
+# Test 13: Pool Management - Invalid Signature
 # =============================================================================
 
 print_test "Test Pool API - Invalid Signature (Expected to fail)"
@@ -336,7 +436,7 @@ print_info "(Note: The 'r must be 0 < r < CURVE.n' error in server logs for this
 echo ""
 
 # =============================================================================
-# Test 10: Pool Management - Invalid Percentage Range
+# Test 14: Pool Management - Invalid Percentage Range
 # =============================================================================
 
 print_test "Test Pool API - Invalid Percentage (Expected to fail)"
@@ -359,7 +459,7 @@ fi
 echo ""
 
 # =============================================================================
-# Test 11: Get User Invoices (Should be empty)
+# Test 15: Get User Invoices (Should be empty)
 # =============================================================================
 
 invoices_response=$(run_test "Get User Invoices (Empty)" "GET" "/api/invoices/user/$WALLET_ADDRESS" "" 200)
@@ -372,7 +472,7 @@ fi
 echo ""
 
 # =============================================================================
-# Test 12: Invoice Registration (Optional - requires blockchain)
+# Test 16: Invoice Registration (Optional - requires blockchain)
 # =============================================================================
 
 if [ "$SKIP_INVOICE" = false ]; then
@@ -408,7 +508,7 @@ if [ "$SKIP_INVOICE" = false ]; then
   echo ""
 
   # =============================================================================
-  # Test 13: Get User Invoices After Registration
+  # Test 17: Get User Invoices After Registration
   # =============================================================================
 
   if echo "$invoice_response" | grep -q "\"success\".*true"; then
@@ -426,7 +526,7 @@ if [ "$SKIP_INVOICE" = false ]; then
   fi
 
   # =============================================================================
-  # Test 14: Get Invoices by Lottery Day
+  # Test 18: Get Invoices by Lottery Day
   # =============================================================================
 
   lottery_response=$(run_test "Get Invoices by Lottery Day" "GET" "/api/invoices/lottery/$LOTTERY_DAY" "" 200)
@@ -440,7 +540,7 @@ else
 fi
 
 # =============================================================================
-# Test 15: Rewards API
+# Test 19: Rewards API
 # =============================================================================
 
 print_header "Testing Rewards API"
@@ -458,7 +558,7 @@ run_test "Claim Reward (Invalid Signature)" "POST" "/api/rewards/claim" "$claim_
 echo ""
 
 # =============================================================================
-# Test 16: Pool Management API
+# Test 20: Pool Management API
 # =============================================================================
 
 print_header "Testing Pool Management API"
@@ -488,7 +588,7 @@ run_test "Deactivate Pool (Invalid Signature)" "DELETE" "/api/pools/$POOL_ID" "$
 echo ""
 
 # =============================================================================
-# Test 17: Token API
+# Test 21: Token API
 # =============================================================================
 
 print_header "Testing Token API"
@@ -500,7 +600,7 @@ run_test "Check if Token is Drawn" "GET" "/api/tokens/$TOKEN_TYPE_ID_TOKEN/drawn
 echo ""
 
 # =============================================================================
-# Test 18: Admin API
+# Test 22: Admin API
 # =============================================================================
 
 print_header "Testing Admin API"
@@ -519,6 +619,105 @@ set_pool_contract_data='{
   "signature": "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 }'
 run_test "Set Pool Contract (Invalid Signature)" "PUT" "/api/admin/pool-contract" "$set_pool_contract_data" 403
+
+echo ""
+
+# =============================================================================
+# Test 23: Oracle API
+# =============================================================================
+
+print_header "Testing Oracle API"
+
+# Test 23.1: Missing required fields
+print_test "Test Oracle API - Missing Fields (Expected to fail)"
+missing_fields_data='{
+  "lotteryDate": "2025-11-25",
+  "specialPrize": "53960536"
+}'
+
+missing_fields_response=$(curl -s -w "\n%{http_code}" -X POST "${BASE_URL}/api/oracle/process-lottery" \
+  -H "Content-Type: application/json" \
+  -d "$missing_fields_data")
+
+missing_fields_code=$(echo "$missing_fields_response" | tail -n1)
+if [ "$missing_fields_code" -eq 400 ]; then
+  print_success "Missing fields correctly rejected (HTTP 400)"
+else
+  print_failure "Missing fields should return 400, got $missing_fields_code"
+fi
+
+echo ""
+
+# Test 23.2: Invalid date format
+print_test "Test Oracle API - Invalid Date Format (Expected to fail)"
+invalid_date_data='{
+  "lotteryDate": "11/25/2025",
+  "specialPrize": "53960536",
+  "grandPrize": "51509866",
+  "firstPrize": "12345678"
+}'
+
+invalid_date_response=$(curl -s -w "\n%{http_code}" -X POST "${BASE_URL}/api/oracle/process-lottery" \
+  -H "Content-Type: application/json" \
+  -d "$invalid_date_data")
+
+invalid_date_code=$(echo "$invalid_date_response" | tail -n1)
+if [ "$invalid_date_code" -eq 400 ]; then
+  print_success "Invalid date format correctly rejected (HTTP 400)"
+else
+  print_failure "Invalid date format should return 400, got $invalid_date_code"
+fi
+
+echo ""
+
+# Test 23.3: Invalid prize number (not 8 digits)
+print_test "Test Oracle API - Invalid Prize Numbers (Expected to fail)"
+invalid_prize_data='{
+  "lotteryDate": "2025-11-25",
+  "specialPrize": "123",
+  "grandPrize": "51509866",
+  "firstPrize": "12345678"
+}'
+
+invalid_prize_response=$(curl -s -w "\n%{http_code}" -X POST "${BASE_URL}/api/oracle/process-lottery" \
+  -H "Content-Type: application/json" \
+  -d "$invalid_prize_data")
+
+invalid_prize_code=$(echo "$invalid_prize_response" | tail -n1)
+if [ "$invalid_prize_code" -eq 400 ]; then
+  print_success "Invalid prize numbers correctly rejected (HTTP 400)"
+else
+  print_failure "Invalid prize numbers should return 400, got $invalid_prize_code"
+fi
+
+echo ""
+
+# Test 23.4: Valid lottery processing request
+print_test "Test Oracle API - Valid Request"
+print_info "This test processes lottery results with winning numbers"
+print_info "If no invoices exist for this date, it will return 0 processed"
+
+valid_lottery_data='{
+  "lotteryDate": "2025-11-25",
+  "specialPrize": "53960536",
+  "grandPrize": "51509866",
+  "firstPrize": "12345678"
+}'
+
+lottery_process_response=$(run_test "Process Lottery Results" "POST" "/api/oracle/process-lottery" "$valid_lottery_data" 200)
+if echo "$lottery_process_response" | grep -q "\"success\".*true"; then
+  print_success "Lottery processing API works correctly"
+
+  # Check how many invoices were processed
+  processed_count=$(echo "$lottery_process_response" | tail -n1 | jq -r '.data.processed' 2>/dev/null || echo "0")
+  if [ "$processed_count" -gt 0 ]; then
+    print_success "Processed $processed_count winning invoice(s)"
+  else
+    print_info "No winning invoices found for this lottery date (expected if no test data)"
+  fi
+else
+  print_warning "Lottery processing request failed (may be expected if no blockchain setup)"
+fi
 
 echo ""
 

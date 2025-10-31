@@ -14,18 +14,18 @@ artifacts:
   kernel: https://github.com/oasisprotocol/oasis-boot/releases/download/v0.6.2/stage1.bin#e5d4d654ca1fa2c388bf64b23fc6e67815893fc7cb8b7cfee253d87963f54973
   stage2: https://github.com/oasisprotocol/oasis-boot/releases/download/v0.6.2/stage2-podman.tar.bz2#b2ea2a0ca769b6b2d64e3f0c577ee9c08f0bb81a6e33ed5b15b2a7e50ef9a09f
   container:
-    runtime: https://github.com/oasisprotocol/oasis-sdk/releases/download/rofl-containers%2Fv0.8.0/rofl-containers#08eb5bbe5df26af276d9a72e9fd7353b3a90b7d27e1cf33e276a82dfd551eec6
+    runtime: https://github.com/oasisprotocol/oasis-sdk/releases/download/rofl-containers%2Fv0.8.2/rofl-containers#e9589c9cb68aee146a61ceefcce749ef5a391258dd26dc3037027733d883839f
     compose: compose.yaml
 deployments:
   default:
-    app_id: rofl1qpvyhvlsqdfyewxv3080c6n9c0ckd445rygva87y
+    app_id: rofl1qr8sku6hdlqrld8af8k939nk0ls7w3jz8g95f24h
     network: testnet
     paratime: sapphire
     admin: june
-    oci_repository: rofl.sh/3088a229-8319-437d-af94-b72df5ea1117:1761850465
+    oci_repository: rofl.sh/dd86bfee-7f3e-4f38-8ee0-14c33507c70c:1761900571
     trust_root:
-      height: 29110363
-      hash: c3794a821af559ca816471c2c2d7846148012bdadc2676c06c14c27415aaaab2
+      height: 29119351
+      hash: 046fe04301e0da978fb4b953290a18c668cea9b273f02049ace3ae0f6451c359
     policy:
       quotes:
         pcs:
@@ -33,37 +33,39 @@ deployments:
           min_tcb_evaluation_data_number: 18
           tdx: {}
       enclaves:
-        - id: 4jjdZKR5jVcb+c36I9YQ9Gn6wVbtcqguj7RbmWxTJAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
-        - id: XMAq6/Y5Of37Jono1fzkaMUEr0iCOl2u+NhqvriA7N8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+        - id: MU8+sbIUPP5n+WpmapxVvfGXqmk/3mRaqWclrQTh8DcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+        - id: +VcHaGsaxD8oi1TLDMdwow+JzF0aSRnkWu7ptYqH9LkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
       endorsements:
         - any: {}
       fees: endorsing_node
       max_expiration: 3
     secrets:
-      - name: ADMIN_PRIVATE_KEY
-        value: pGJwa1ggpNOdvuZVYZtve2vumGM4rfnwxq4rbHGewy+lqPRssl5kbmFtZVgh0HWC+eeAyMaQDUANRkSWci08NNgX1nboF7okEw2YfGgHZW5vbmNlTyDNGJdwseKXDV3VVMSmrGV2YWx1ZVhS4n6+Zt9N6Dt23t9OMF+wPJwBCTO29WZXEnLH2iMyhMmDbUOmfVz10HRRTmVyO8KlnVPZysPzDvj2KKL4idTVYb1Cg/Snb9GA4CTjibKxgx+Xug==
-      - name: ADMIN_ADDRESS
-        value: pGJwa1ggfqRoR2cO93VLkd0TE0lA9j/PLS6ONJ3hor///s9Tu0RkbmFtZVgdqknKp+QV9WSCFHMGEtYl1bdVCfsxi4Gx55vDiaJlbm9uY2VPtJ+zVud3q3stzHDTWNO9ZXZhbHVlWDoqLzLe6fPqjrv3ceqd5qJkuECAU9zopV7LtrHyW5zZZkvU5zqS0h1z5WB1O5QGuw4m5F+Dx4ID3CdY
-      - name: RELAYER_PRIVATE_KEY
-        value: pGJwa1ggf3VNwAXdzNisKUnWRnGcqHSgtbYtXB0UNqQtt8lAVVFkbmFtZVgjx4zKMd64kZVNriw9FQxLV5S94lSOcW6QZBerMBMcqaUXRrBlbm9uY2VPq/Y9zTlUMqS/ZnBuWqu5ZXZhbHVlWFL0RSNPtOx8oKGtBkUiIl2ZY4gpUtYjJI3uKVK/LewNP+/0xo/CakcdNJle1RguCsVUnd6H+ZB6MC5Fb6wjx01ih35tb2IAH5KT/anshB3Rop92
-      - name: RELAYER_ADDRESS
-        value: pGJwa1gg3TAtCSGVWbAvATVDgvbKa5TGz/El9aGXeUnk1qyJ5SxkbmFtZVgfDH1anF/eOQcQ2DMaCVTbjDlNPWqa9lHeirZTFa6hUmVub25jZU+jN1Tvj2yY9WCxm707FFhldmFsdWVYOhPDQ0ZMnFLgUQQU4EGfEF0403XjEF8oXicIL01aWeRaE5XfdQYmt3/dukD0KVb+M1An53q1ZI8t8gk=
-      - name: ORACLE_PRIVATE_KEY
-        value: pGJwa1gghj9jBJB7hY2dtRH9ZkOhWxyUAiVsQCnR3mTkBP0hLF9kbmFtZVgiyr/uNH8JBlw0jn2Fq4j8pSx0w0Tl3qqfjATujjDStxS72GVub25jZU+cpGp2pHMI/zvrXNXUha1ldmFsdWVYUh/SeuioJr87ZMqhlR5BjoObKAWyedvhD5vclmgJPTup4bQW/3PqNthya5q7uVZ+J2mbb2qzQndlAm9m2bBK4R119oVPON4eu/v4inhtdC8nQ0s=
-      - name: ORACLE_ADDRESS
-        value: pGJwa1ggJy5W5CBj5VnUrWuTkGp0EE9ynMswrSeNQPbYKAcgdXJkbmFtZVgeoZKPW1ohDgIWVJmnSuIkVJasaCG6Y6v67YBr7g++ZW5vbmNlTwAGOhdC0DTwuwGhbNXiMGV2YWx1ZVg6cX/2xeB6+4wFGro8vCA/BhzVOjFhITaGKj53O0Dj065t5BGLV3AJdD6do/WJQPl1oAgGWQZrQLFp3A==
       - name: INVOICE_TOKEN_V2_ADDRESS
-        value: pGJwa1gg1fuUROCdWMH/ZuY7GooEg9WX851wbEqJU0K179O3Ui5kbmFtZVgo6zqZlJPV4ANhPvNecdd2o3NQcad6vN/h0ivBLo/Z5ZLv/eg/bDXHnWVub25jZU+3xSuS6VClAq7VxV7wYoJldmFsdWVYOsuVeqn32hMBRYTaxMyT3AUQzEj/S8yYw1hLw6Q3GJzMOjZVoTUO9UhOcbycFSxFNfEpVLzQnMld3Vo=
+        value: pGJwa1ggk4SUkx05hBtSmIGiw+E5a2WlovdnUAk+8K7+xBEsAAhkbmFtZVgok/KW9QC8BlJHpf3DtAeZG7loQtskzKaTmzZoLaG4sreJbIBOgAg1U2Vub25jZU+4vR0mvZ+NfMsZSY1B03pldmFsdWVYOiQhBEgk6oU9dnUIH6xeyX5R9jou/Oxb1RD1WEqVP4vWxceA+NWEmv1dfclyL7lkb89bDwZG0xpuSuc=
       - name: POOL_V2_ADDRESS
-        value: pGJwa1ggad6ahwym6vd86VwXUhXHZQzq+/BIbVcL7wAWY4FF4hRkbmFtZVgfEoXZzqmV1YC8vjUto2/JDHIraIajmoA/ARiMZF/TWmVub25jZU+zwwJAw8mbu74KjvgsmolldmFsdWVYOkyVMzWXPWTnUOTNlmv1/VztocqphlVwGYazsCUQvudOI0lGUuOgadKfxUBXAgoD+NGt22BggmhOPVU=
-      - name: ZIRCUIT_TESTNET_RPC_URL
-        value: pGJwa1ggO5W75jKcwf87xsGDPXdCm0lmScqqorUFw/WSfVIqpkFkbmFtZVgn3FwqumgJjdQrSRCS9Po3VPKo3bo33xi98bqnVKoKGTv2P4IzU+X0ZW5vbmNlT/BuXAQUtI3wdx0XA7w/Z2V2YWx1ZVg1avTR49hUuPLA7VzsFDtWvpowenC3FbYSglXTxq/8T/yCObPVCUzFV3p/T1k6nwBkVA67FXA=
+        value: pGJwa1gg1MtYDqHUmAu0wvodJphfb9wR335JGtIO/DaLZgeqf2FkbmFtZVgfJ2kV6Jl2opNWOE4LYSapoDdhpYhmUm3eH8CTXZjv5GVub25jZU+smrvIZ2ASXdv08Ozk4kFldmFsdWVYOsheRyXa86CZqSxYsDzQPN8eOgWa1+8gmOyFEUNZ/9j1dGV188zFzkkBNwMk4cAUg6UxW0SPKRS1tm8=
+      - name: ADMIN_PRIVATE_KEY
+        value: pGJwa1ggN6aHGnK3A0VsA+A7NupCVr1KmStWRqb4vXvSYjOpGkZkbmFtZVghKZMC8cQYYqm7r07EnYoOIKPh4HpXGvg+KL/gzAhg12GgZW5vbmNlT1WpKiRBKgDpyJf4t8uLVGV2YWx1ZVhSlYe+lgkxY4NAioudOUxafnKiKBvneIzp2wFRp2d12xyv7DhmlJs3FS4czooLpenGCmw4mGxrNYrE/jKHjWSDS1HXhLO/Ag5K+DbgyB4OY0kvxw==
+      - name: ADMIN_ADDRESS
+        value: pGJwa1ggrcQNEpwzRCA2SSFpW4Kig09JfquFS33Eq3dKIbY9lW1kbmFtZVgdjaMT+T/T4uMsVxdYnMpaY3X+OrQ4kOQBKuhghgFlbm9uY2VPG3FLNt+Bb8vwA2oj22mtZXZhbHVlWDrKLP++xT7xDsl6KEDLinQoKhSOvTBQiLVUBqiyaqIQX7RMxunUZh1/Medc5qXu7JzhYHuk5IeZqjgb
+      - name: RELAYER_PRIVATE_KEY
+        value: pGJwa1gg1j2tteOGqFFkqHqH1+3+FkddXDtCC9WXDZhyRqBdXABkbmFtZVgj1C8UGIGD1cRem0FdzQ8KsP5TgDShClbQLhV0dQ4A9MS1YQplbm9uY2VP+X++a5U1FiX2D49wLRS+ZXZhbHVlWFJ14GHDflEmfzFmNKsvSz1LfWiynJCw40euZSQB8WNo+BLVVAc99gvi4B3fJeoWIvup2mzAaUc1jAFb1UtntkvFu74dfvRW7YnxW//Js91waMRu
+      - name: RELAYER_ADDRESS
+        value: pGJwa1ggtYYiYUiiUoNuz69WGom1MYWjcjG4O118auF+ON0SxHJkbmFtZVgfVnoq823LuNCccDe4GNZbUvaP6YVbZtaf7RS44ehnY2Vub25jZU/ov9tm3FyEW4kSVnheB2BldmFsdWVYOnrXPvZpczFN/wIm6yate3sYDX70b7A0WL9WtzmnBfBdd9rH2gpEm+DKPK7aXJ4b5aOqdCs+QgOOITs=
+      - name: ORACLE_PRIVATE_KEY
+        value: pGJwa1ggH+7c25z7zN1UDsLY7TF2uN5xToJogEfryRFxtm68jyRkbmFtZVgiOH3mmXbRvUsoIpKCQIpfzjBbsW0XNDV59RO1D7qR1PuXz2Vub25jZU+0iYetPA4UdeJ9PJvGj9pldmFsdWVYUhd5CFdrW/x79ROVokqjRuR/NfZCWiUL0kXTIaCcqOVUndz7rnVsGfQXhnDTSltKHPpO/dDGRPFR+w1OMiLbpPMEEEbuIfwNh3qXGQGNM14Vl14=
+      - name: ORACLE_ADDRESS
+        value: pGJwa1ggTdC71T2gTgAuReCywvZonwnrBcURT5bCw1jbj6OgsA1kbmFtZVge34GgJogmNzEfVv+VUVURTogmbsFl+/3d0+w8Zu7/ZW5vbmNlTxMxaO+C8Uw4pLRn8ui4nGV2YWx1ZVg6pg9VH+PdIpvzjQ17CyuutorAsllzSKMcbIJXTedsjQgNdQrliy4KV2qB/tGj8hR0NV/Y6rdYFhizkA==
       - name: BENEFICIARY_ADDRESS
-        value: pGJwa1gg5jtRMTIjJspabiUS/iWlQ+BBh5cPIxhHuMloJccj7ghkbmFtZVgjIE5+L1Pk/TV9VThx/eRxhDysRS9m97NBP7igxxtPkQgDpQVlbm9uY2VPMqNi4t+Swg2nXl4grR5jZXZhbHVlWDo0tOAqWc2A6RtgZVaz2dgpi/7GTr/L4xZl/HRHq9DovKaxq7S2PWihmIqQjZorQe/vAjUUynGKMIoN
+        value: pGJwa1ggHSLT2HRYZagNBl3hANUzN23kTy8g5pS3CX4rb6dSSEBkbmFtZVgj2jQWf1SZ4lPZt7yqyKMycxSduPWmLpz9QdF6myIrJRoiKTJlbm9uY2VPPurgci5EU2lV21toMFxfZXZhbHVlWDqhpkaRzQB2olvwQmEiu+eny6mUxtdzUpdchr2SjJfN607gvt/Tv0s4bTgjB8OWvgzIyTi3jiYDUzOJ
+      - name: BENEFICIARY_PRIVATE_KEY
+        value: pGJwa1ggf5eJYMPAlFDoxR4Kk4TeFqzDqtgBs2GZcurI+p3nSWZkbmFtZVgnt/6PCDEKnhQiJnQkYOgkBDcVkePJ+KEosX85gWEkWaK25O9IB6ukZW5vbmNlT+GRv00ql+dkYj2bjKnCT2V2YWx1ZVhQ9wgkBg3OH1mHtPOmBZhBixJtEWPJzUTEjQ5PM9b7zL9XIdip9fwVkHW1olqwnwPRpofCHfABlO1wJPycU4JEqX390OwEYQtDxltgoWrJG/c=
       - name: CHAIN_ID
-        value: pGJwa1gg8t45RSoyqb9d3g+u9Akh59EbCjU8Jgw/6V2pNrgQ4ktkbmFtZVgYB6tQe+XQFcg1ihN8gI69w/vSNT3ZMXfRZW5vbmNlT7JWeIDoLeMUUd1e5KE+tmV2YWx1ZVV+8fEc4NzfeMw7HrgGhFlGcagrLqA=
+        value: pGJwa1ggvl3uOZiwCXs3GJLTXRVAx591WCt9fxxK40nJZ12gb2xkbmFtZVgYn2cw1cyHCOP3xR3zaC7Vj9rUVezVeaHiZW5vbmNlTyeP0VIlNPJCWQAPX5Tbe2V2YWx1ZVWqbXbfUy5oo4IVtB1I93vVnFDkq5k=
+      - name: ZIRCUIT_RPC_URL
+        value: pGJwa1ggLrUl0TZN3QLEv/YwhePNTujTl8Ct2OX+igOk7Aa00GhkbmFtZVgfGDB63JQuIgIHPgxqsKgdhLmh6Q+bZtnFhPjkf4d10GVub25jZU8sJ5nqORWnDedSmR8WRg1ldmFsdWVYND7hNdgeOck+mK2DvDGXewgRZ+4goRTye/fUMtmcK8HhA28d1XpETHJkeRA4IE5WixRTwiE=
     machines:
       default:
         provider: oasis1qp2ens0hsp7gh23wajxa4hpetkdek3swyyulyrmz
         offer: playground_short
-        id: 00000000000003ae
+        id: 00000000000003bd

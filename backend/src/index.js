@@ -8,6 +8,7 @@ import poolRoutes from "./routes/pool.js"; // Import pool routes
 import rewardsRoutes from "./routes/rewards.js";
 import tokenRoutes from "./routes/tokens.js";
 import adminRoutes from "./routes/admin.js";
+import oracleRoutes from "./routes/oracle.js"; // Import oracle routes
 import relayerService from "./services/relayer.js";
 import oracleService from "./services/oracle.js";
 import eventListenerService from "./services/eventListener.js";
@@ -40,6 +41,7 @@ app.use("/api/pools", poolRoutes); // Use pool routes
 app.use("/api/rewards", rewardsRoutes);
 app.use("/api/tokens", tokenRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/oracle", oracleRoutes); // Use oracle routes
 
 // Health check
 app.get("/health", (req, res) => {

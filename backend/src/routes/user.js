@@ -17,10 +17,10 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    if (![20, 50].includes(donationPercent)) {
+    if (donationPercent < 25 || donationPercent > 100) {
       return res
         .status(400)
-        .json({ error: "Donation percent must be 20 or 50" });
+        .json({ error: "Donation percent must be at least 25%" });
     }
 
     // Check if already registered (using abstracted query)
@@ -98,10 +98,10 @@ router.put("/:walletAddress", async (req, res) => {
     const { walletAddress } = req.params;
     const { poolId, donationPercent } = req.body;
 
-    if (donationPercent && ![20, 50].includes(donationPercent)) {
+    if (donationPercent && (donationPercent < 25 || donationPercent > 100)) {
       return res
         .status(400)
-        .json({ error: "Donation percent must be 20 or 50" });
+        .json({ error: "Donation percent must be at least 25%" });
     }
 
     const updateData = {};

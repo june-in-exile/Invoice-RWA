@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
   wallet_address VARCHAR(42) UNIQUE NOT NULL,
   carrier_number VARCHAR(20) UNIQUE NOT NULL,
   pool_id INT NOT NULL,
-  donation_percent INT NOT NULL CHECK (donation_percent IN (20, 50)),
+  donation_percent INT NOT NULL CHECK (donation_percent >= 25 AND donation_percent <= 100),
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );

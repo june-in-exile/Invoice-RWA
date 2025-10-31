@@ -31,7 +31,7 @@ services:
       - DB_NAME=invoice_rwa
 
       # Blockchain configuration
-      - ZIRCUIT_RPC_URL=${ZIRCUIT_RPC_URL:-https://zircuit-garfield.liquify.com}
+      - ZIRCUIT_RPC_URL=${ZIRCUIT_TESTNET_RPC_URL:-https://zircuit-garfield.liquify.com}
       - CHAIN_ID=${CHAIN_ID:-48898}
 
       # Contract addresses
