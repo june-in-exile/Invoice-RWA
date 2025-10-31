@@ -53,16 +53,34 @@ Backend service for Invoice RWA (Real World Asset) platform that tokenizes physi
 
 ### Pool Management
 
+- `GET /api/pools` - Get all registered pool IDs
+- `GET /api/pools/:poolId` - Get data for a specific pool
 - `POST /api/pools/register` - Register a new pool (Admin only, requires signature)
+- `POST /api/pools/:poolId/withdraw` - Withdraw donations from a pool (Beneficiary only, requires signature)
+- `PUT /api/pools/:poolId/beneficiary` - Update a pool's beneficiary address (Admin only, requires signature)
 - `PUT /api/pools/:poolId/min-donation-percent` - Update a pool's minimum donation percentage (Beneficiary only, requires signature)
+- `DELETE /api/pools/:poolId` - Deactivate a pool (Admin only, requires signature)
 
 ### Invoice Management
 
 - `POST /api/invoices/register` - Register single invoice
-- `POST /api/invoices/batch-register` - Batch register invoices
-- `GET /api/invoices/user/:walletAddress` - Get user invoices
-- `GET /api/invoices/lottery/:lotteryDay` - Get invoices by lottery date
+// ... existing code ...
 - `GET /api/lottery-results?lottery_date=YYYY-MM-DD` - Query lottery results (internal API)
+
+### Rewards API
+
+- `GET /api/rewards/:walletAddress/:tokenTypeId` - Get claimable reward for a user and token type
+- `POST /api/rewards/claim` - Claim reward for a user (User or Operator, requires signature)
+
+### Token API
+
+- `GET /api/tokens/:tokenTypeId` - Get data for a specific token type
+- `GET /api/tokens/:tokenTypeId/drawn` - Check if a token type has been drawn
+
+### Admin API
+
+- `PUT /api/admin/token-uri` - Set the token URI for the InvoiceToken contract (Admin only, requires signature)
+- `PUT /api/admin/pool-contract` - Set the Pool contract address (Admin only, requires signature)
 
 ## Advanced Testing: Admin & Pool Management
 

@@ -15,11 +15,19 @@ git:
     revert
 
 backend:
-    please summarize the change in this directory and generate a proper commit message in one sentence that is less than 20 words
+    please summarize the change (since last commit) in this directory and generate a proper commit message in one sentence that is less than 20 words
 
 contract:
 
     curl https://p3000.m942.opf-testnet-rofl-25.rofl.app/health
+
+    I want to test the contract locally.
+    first, set up a local blockchain
+  (Anvil) and deploy V2 contracts, noting addresses and private keys. Second, configure the backend's .env
+  with these local blockchain details. Third, generate valid signatures for API calls using a script or tool.
+   Fourth, modify test-api.sh to use these valid signatures, change expected statuses to 200 for successful
+  calls, and add assertions to verify response data. Finally, run the backend and the updated test script to
+  perform end-to-end functional testing.
 
 echo -n "0xEA045e3bf79147304f1263aC26AE2a74b5cBD819" | oasis rofl secret set INVOICE_TOKEN_V2_ADDRESS - --force
 echo -n "0xE6843c2E5997ccF10b31D43218dDdFa383aB303a" | oasis rofl secret set POOL_V2_ADDRESS - --force
