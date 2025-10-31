@@ -12,7 +12,7 @@ export default defineConfig({
       // 2. 當你的 React 程式碼請求 '/api' 開頭的路徑時...
       '/api': {
         // 3. Vite 會自動幫你轉發到 'http://localhost:3000'
-        target: ' https://p3000.m942.opf-testnet-rofl-25.rofl.app/',
+        target: ' https://p3000.m951.opf-testnet-rofl-25.rofl.app/',
         
         // 4. 這是必須的，它會更改請求頭中的 'Origin'
         changeOrigin: true,

@@ -330,36 +330,14 @@ const Onboarding: React.FC = () => {
             </p>
           </div>
 
-          {/* --- "綁定已有錢包" 區塊 (Updated) --- */}
-          <div
-            className="flex flex-col items-center gap-2 pt-6 pb-2 cursor-pointer" // <-- Added cursor-pointer
-            onClick={handleConnectWallet} // <-- Added onClick
+          {/* --- "綁定已有錢包" 按鈕 (Updated) --- */}
+          <button
+            onClick={handleConnectWallet}
+            className="flex items-center justify-center gap-2 px-6 py-3 mt-4 text-primary hover:text-primary/80 transition-colors"
           >
-            <div className="flex justify-center items-center gap-4">
-              <div className="flex items-center justify-center h-12 w-12 rounded-full ring-2 ring-primary bg-component-bg-light dark:bg-component-bg-dark">
-                <img
-                  alt="imToken logo"
-                  className="h-8 w-8"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDR-Wiu6TKyppKxRLOSbOIOzY2ax1PGa2Dp_pFeZbwUKg3Uyz1OaLAsz8ylwloDeqrUAdGddrhBdj5iEyylC6hBGqkvt70Ys8WDX13D6e5m2Yer10aG8MKPtLvb5nXob-imOKzmKpHgVjoRDJvxZY-0fwG5AFaXa1kCKzftmSbTe89gZJLRwcemGsV6BL5qa9LBqUKQyf6aOrksOiweW5w7WrRK00U0dGfIRjlJml2VpnFqoXgyxVFstBe0HAE8iolQmUop6AgZi1qS"
-                />
-              </div>
-              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-component-bg-light dark:bg-component-bg-dark opacity-50">
-                <img
-                  alt="MetaMask logo"
-                  className="h-6 w-6"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdi23bGvlMfJ1EuQFd3mRnY2QMEn9mABXEXoSYkrfevTP7Pvtft3fAYoQLVym1aJBrbnGfgwf6gmx_kZHaVNQidXLZuvO-_87FbDUBNidWNNucuMAzr-GO0dLpMJhYsgihNWczisjksCF-HfsDCfUezfms5ls4Dhs37U6k2h7EozJrKLK4VZAr4YdorHUWZ2oP_74CBUmgxVPb7ceUlXe8S85M8IfwvdvklPLCmbM6dAZm9OF6Qx4wU_SApIXvYifJbXDqdpVJEQD7"
-                />
-              </div>
-              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-component-bg-light dark:bg-component-bg-dark opacity-50">
-                <img
-                  alt="Trust Wallet logo"
-                  className="h-6 w-6"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnVSCy0Zc40XEYYHaTJFaW2HYSfdhWzffbbBa5GxpSzplX8FOVwGlY8XCinbtSokgsrS-AJRUxxcDX56ku-X2Pm82Y3dH5Q0Eavm04OlOi6px4EWlsDPkn4ZS9b6wb-XdHTe-C7cMMG65sOlxBkgEq58HxPWwhZrCHxvpyVsjM1yzBkjXt61uF0vNip_EscuY5_fFQN7y6DmjccC3172hP0YFAUu6y6nuZQzlRtUGemv4HNzICO0VOH1bACGzqtH11RGr_Op69bvD_"
-                />
-              </div>
-            </div>
-            <p className="text-subtle-light dark:text-subtle-dark text-sm font-medium">綁定已有錢包</p>
-          </div>
+            <span className="material-symbols-outlined text-xl">account_balance_wallet</span>
+            <span className="text-sm font-medium">綁定已有錢包</span>
+          </button>
 
         </div>
       </main>

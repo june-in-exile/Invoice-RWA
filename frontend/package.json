@@ -12,6 +12,7 @@
     "@web3-react/core": "^8.2.3",
     "@web3-react/injected-connector": "^6.0.7",
     "@web3-react/metamask": "^8.2.4",
+    "axios": "^1.13.1",
     "ethers": "^6.15.0",
     "eventemitter3": "^5.0.1",
     "framer-motion": "^11.3.19",

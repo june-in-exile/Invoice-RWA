@@ -3,19 +3,23 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { charities } from '../lib/charities';
 import Toast from '../components/Toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { hooks } from '../lib/connectors';
 
+const { useAccount } = hooks;
 
 const BindPool: React.FC = () => {
     const navigate = useNavigate();
     const { charityId } = useParams<{ charityId: string }>();
     const charity = charities.find(c => c.id === charityId);
+    const connectedAccount = useAccount();
     
     const [donationRatio, setDonationRatio] = useState<number>(100);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [showCopyToast, setShowCopyToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
+    const [isBinding, setIsBinding] = useState(false);
 
-    const fullWalletAddress = '0xAbCdEf123456789012345678901234567890dEaF';
+    const fullWalletAddress = connectedAccount ?? localStorage.getItem('userWalletAddress') ?? '0xAbCdEf123456789012345678901234567890dEaF';
     const truncatedAddress = `${fullWalletAddress.substring(0, 6)}...${fullWalletAddress.substring(fullWalletAddress.length - 4)}`;
 
     const handleCopyAddress = () => {
@@ -30,11 +34,65 @@ const BindPool: React.FC = () => {
         });
     };
 
-    const handleConfirmBinding = () => {
-        if (charityId) {
-            localStorage.setItem('boundCharityId', charityId);
+    const handleConfirmBinding = async () => {
+        if (!charityId || !fullWalletAddress) {
+            setToastMessage('請先連接錢包');
+            setShowCopyToast(true);
+            setTimeout(() => setShowCopyToast(false), 2000);
+            return;
         }
-        setShowSuccessModal(true);
+
+        try {
+            setIsBinding(true);
+
+            // Find charity index (poolId) - charities array index maps to poolId
+            const poolIdMap: { [key: string]: number } = {
+                'sunshine': 1,
+                'stray-animal': 2,
+                'rare-disorders': 3,
+                'child-welfare': 4,
+            };
+            const poolId = poolIdMap[charityId];
+
+            if (!poolId) {
+                throw new Error('Invalid charity ID');
+            }
+
+            // Send PUT request to update pool binding
+            const response = await fetch(`/api/users/${fullWalletAddress}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    poolId: poolId,
+                    donationPercent: donationRatio,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Failed to bind pool');
+            }
+
+            const data = await response.json();
+            console.log('✅ Pool binding successful:', data);
+
+            // Save to localStorage for quick access
+            localStorage.setItem('boundCharityId', charityId);
+            localStorage.setItem('boundPoolId', poolId.toString());
+            localStorage.setItem('donationPercent', donationRatio.toString());
+
+            setShowSuccessModal(true);
+
+        } catch (error: any) {
+            console.error('❌ Failed to bind pool:', error);
+            setToastMessage(error.message || '綁定失敗，請稍後再試');
+            setShowCopyToast(true);
+            setTimeout(() => setShowCopyToast(false), 3000);
+        } finally {
+            setIsBinding(false);
+        }
     };
 
     const handleViewWallet = () => {
@@ -114,31 +172,25 @@ const BindPool: React.FC = () => {
                         <p className="text-text-light dark:text-text-dark tracking-tight text-2xl font-bold leading-tight">84,201</p>
                     </div>
                 </div>
-                <div className="px-4">
-                    <div className="flex flex-col gap-4 rounded-xl border border-border-light dark:border-border-dark bg-component-bg-light dark:bg-component-bg-dark/50 p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="flex size-10 items-center justify-center rounded-full bg-primary/20">
-                                <span className="material-symbols-outlined text-primary">security</span>
-                            </div>
-                            <p className="flex-1 text-text-light dark:text-text-dark text-base font-medium leading-normal">正在建立你的公益錢包，由 imToken 安全託管。</p>
-                        </div>
-                        <div className="flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-slate-800 p-3">
-                            <span className="text-subtle-light dark:text-subtle-dark/80 text-sm font-mono truncate">{truncatedAddress}</span>
-                            <button onClick={handleCopyAddress} className="ml-auto flex size-7 shrink-0 items-center justify-center rounded-md text-subtle-light dark:text-subtle-dark hover:bg-gray-200 dark:hover:bg-slate-700">
-                                <span className="material-symbols-outlined text-base">content_copy</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
             </main>
 
             <footer className="fixed bottom-0 left-0 right-0 p-4 bg-background-light dark:bg-background-dark bg-opacity-80 backdrop-blur-sm border-t border-border-light dark:border-border-dark">
-                <p className="text-center text-xs text-subtle-light dark:text-subtle-dark mb-4 px-2">平台將於七天後自動將發票上鏈，由 imToken 安全託管，以 USDT 結算。</p>
                 <button
                   onClick={handleConfirmBinding}
-                  className="w-full h-14 text-center rounded-xl bg-primary text-white text-base font-bold shadow-[0_4px_14px_rgba(38,169,92,0.4)] hover:bg-opacity-90 active:scale-95 transition-all"
+                  disabled={isBinding}
+                  className="w-full h-14 text-center rounded-xl bg-primary text-white text-base font-bold shadow-[0_4px_14px_rgba(38,169,92,0.4)] hover:bg-opacity-90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
                 >
-                    確認綁定此公益池
+                    {isBinding ? (
+                        <span className="flex items-center justify-center gap-2">
+                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            綁定中...
+                        </span>
+                    ) : (
+                        '確認綁定此公益池'
+                    )}
                 </button>
             </footer>
 
