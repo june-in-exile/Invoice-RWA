@@ -2,6 +2,22 @@ import { ethers } from "ethers";
 import { poolV2 as poolContract, adminWallet, adminAddress } from "../config/contracts.js";
 import logger from "../utils/logger.js";
 
+/**
+ * Verifies a signature and returns the signer's address.
+ * Throws an error if the signature is invalid.
+ * @param {string} message - The message that was signed.
+ * @param {string} signature - The signature to verify.
+ * @returns {string} The address of the signer.
+ */
+function verifySignature(message, signature) {
+  try {
+    return ethers.verifyMessage(message, signature);
+  } catch (error) {
+    // Re-throw a generic error to be caught by the route handler.
+    throw new Error("Invalid signature.");
+  }
+}
+
 class PoolService {
 
   /**
@@ -13,7 +29,7 @@ class PoolService {
 
       // 1. Verify the signature from the admin
       const message = `Register pool ${poolId} with beneficiary ${beneficiary}`;
-      const signerAddress = ethers.verifyMessage(message, signature);
+      const signerAddress = verifySignature(message, signature);
 
       if (signerAddress.toLowerCase() !== adminAddress.toLowerCase()) {
         throw new Error("Invalid signature. Caller is not the admin.");
@@ -71,7 +87,7 @@ class PoolService {
 
       // 2. Verify the signature
       const message = `Update minDonationPercent for pool ${poolId} to ${minDonationPercent}`;
-      const signerAddress = ethers.verifyMessage(message, signature);
+      const signerAddress = verifySignature(message, signature);
 
       if (signerAddress.toLowerCase() !== beneficiary.toLowerCase()) {
         throw new Error("Invalid signature. Caller is not the pool beneficiary.");
@@ -121,7 +137,7 @@ class PoolService {
 
       const beneficiary = poolInfo.beneficiary;
       const message = `Withdraw donation from pool ${poolId}`;
-      const signerAddress = ethers.verifyMessage(message, signature);
+      const signerAddress = verifySignature(message, signature);
 
       if (signerAddress.toLowerCase() !== beneficiary.toLowerCase()) {
         throw new Error("Invalid signature. Caller is not the pool beneficiary.");
@@ -168,7 +184,7 @@ class PoolService {
 
       const currentBeneficiary = poolInfo.beneficiary;
       const message = `Update beneficiary for pool ${poolId} to ${newBeneficiary}`;
-      const signerAddress = ethers.verifyMessage(message, signature);
+      const signerAddress = verifySignature(message, signature);
 
       if (signerAddress.toLowerCase() !== currentBeneficiary.toLowerCase()) {
         throw new Error("Invalid signature. Caller is not the current pool beneficiary.");
@@ -211,7 +227,7 @@ class PoolService {
       logger.info("Deactivating pool", { poolId });
 
       const message = `Deactivate pool ${poolId}`;
-      const signerAddress = ethers.verifyMessage(message, signature);
+      const signerAddress = verifySignature(message, signature);
 
       if (signerAddress.toLowerCase() !== adminAddress.toLowerCase()) {
         throw new Error("Invalid signature. Caller is not the admin.");

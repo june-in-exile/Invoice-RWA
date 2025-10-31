@@ -2,6 +2,22 @@ import { ethers } from "ethers";
 import { invoiceTokenV2 as invoiceTokenContract, poolV2 as poolContract, adminWallet, adminAddress } from "../config/contracts.js";
 import logger from "../utils/logger.js";
 
+/**
+ * Verifies a signature and returns the signer's address.
+ * Throws an error if the signature is invalid.
+ * @param {string} message - The message that was signed.
+ * @param {string} signature - The signature to verify.
+ * @returns {string} The address of the signer.
+ */
+function verifySignature(message, signature) {
+  try {
+    return ethers.verifyMessage(message, signature);
+  } catch (error) {
+    // Re-throw a generic error to be caught by the route handler.
+    throw new Error("Invalid signature.");
+  }
+}
+
 class AdminService {
 
   /**
@@ -12,7 +28,7 @@ class AdminService {
       logger.info("Setting token URI", { uri });
 
       const message = `Set token URI to ${uri}`;
-      const signerAddress = ethers.verifyMessage(message, signature);
+      const signerAddress = verifySignature(message, signature);
 
       if (signerAddress.toLowerCase() !== adminAddress.toLowerCase()) {
         throw new Error("Invalid signature. Caller is not the admin.");
@@ -48,7 +64,7 @@ class AdminService {
       logger.info("Setting pool contract address", { address });
 
       const message = `Set pool contract to ${address}`;
-      const signerAddress = ethers.verifyMessage(message, signature);
+      const signerAddress = verifySignature(message, signature);
 
       if (signerAddress.toLowerCase() !== adminAddress.toLowerCase()) {
         throw new Error("Invalid signature. Caller is not the admin.");

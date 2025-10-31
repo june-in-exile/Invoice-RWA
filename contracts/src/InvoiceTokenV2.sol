@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "sapphire/Subcall.sol";
 import "./PoolV2.sol";
 
 /**
@@ -14,6 +15,7 @@ contract InvoiceTokenV2 is ERC1155, AccessControl, ReentrancyGuard {
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
+    bytes21 public roflAppId;
 
     PoolV2 public poolContract;
 
@@ -71,6 +73,11 @@ contract InvoiceTokenV2 is ERC1155, AccessControl, ReentrancyGuard {
         poolContract = PoolV2(_poolContractAddress);
     }
 
+    function setRoflAppId(bytes21 _newId) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(_newId.length == 21, "Invalid ROFL App ID");
+        roflAppId = _newId;
+    }
+
     /**
      * @notice Create new token type (if it doesn't exist)
      * @dev Immutable attributes cannot be modified after creation
@@ -79,7 +86,8 @@ contract InvoiceTokenV2 is ERC1155, AccessControl, ReentrancyGuard {
         uint8 donationPercent,
         uint256 poolId,
         uint256 lotteryDay
-    ) public onlyRole(MINTER_ROLE) returns (uint256) {
+    ) public returns (uint256) {
+        Subcall.roflEnsureAuthorizedOrigin(roflAppId);
         require(
             donationPercent == 20 || donationPercent == 50, 
             "Invalid donation percent"
@@ -117,7 +125,8 @@ contract InvoiceTokenV2 is ERC1155, AccessControl, ReentrancyGuard {
         uint256 poolId,
         uint256 lotteryDay,
         uint256 amount
-    ) external onlyRole(MINTER_ROLE) nonReentrant returns (uint256) {
+    ) external nonReentrant returns (uint256) {
+        Subcall.roflEnsureAuthorizedOrigin(roflAppId);
         require(amount > 0, "Amount must be positive");
         require(to != address(0), "Cannot mint to zero address");
 
@@ -142,7 +151,8 @@ contract InvoiceTokenV2 is ERC1155, AccessControl, ReentrancyGuard {
         address to,
         uint256[] calldata tokenTypeIds,
         uint256[] calldata amounts
-    ) external onlyRole(MINTER_ROLE) nonReentrant {
+    ) external nonReentrant {
+        Subcall.roflEnsureAuthorizedOrigin(roflAppId);
         require(
             tokenTypeIds.length == amounts.length, 
             "Length mismatch"

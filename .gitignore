@@ -50,6 +50,7 @@ desktop.ini
 .settings/
 *.sublime-project
 *.sublime-workspace
+.claude*
 
 # Foundry (Smart Contracts)
 # -----------------------------------------------------------------------------

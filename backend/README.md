@@ -94,16 +94,16 @@ The Oracle API allows manual input of Taiwan lottery winning numbers to automati
 
 The Taiwan invoice lottery has the following prize tiers:
 
-| Prize Tier | Match Criteria | Prize Amount (TWD) |
-|------------|----------------|-------------------|
-| Special Prize | Full 8 digits match special prize number | 10,000,000 |
-| Grand Prize | Full 8 digits match grand prize number | 2,000,000 |
-| First Prize | Full 8 digits match first prize number | 200,000 |
-| Second Prize | Last 7 digits match first prize | 40,000 |
-| Third Prize | Last 6 digits match first prize | 10,000 |
-| Fourth Prize | Last 5 digits match first prize | 4,000 |
-| Fifth Prize | Last 4 digits match first prize | 1,000 |
-| Sixth Prize | Last 3 digits match first prize | 200 |
+| Prize Tier    | Match Criteria                           | Prize Amount (TWD) |
+| ------------- | ---------------------------------------- | ------------------ |
+| Special Prize | Full 8 digits match special prize number | 10,000,000         |
+| Grand Prize   | Full 8 digits match grand prize number   | 2,000,000          |
+| First Prize   | Full 8 digits match first prize number   | 200,000            |
+| Second Prize  | Last 7 digits match first prize          | 40,000             |
+| Third Prize   | Last 6 digits match first prize          | 10,000             |
+| Fourth Prize  | Last 5 digits match first prize          | 4,000              |
+| Fifth Prize   | Last 4 digits match first prize          | 1,000              |
+| Sixth Prize   | Last 3 digits match first prize          | 200                |
 
 **Important:** Only 3 winning numbers need to be provided (Special Prize, Grand Prize, First Prize). All other prize tiers (2nd-6th) are automatically calculated based on the last N digits of the First Prize number.
 
@@ -125,12 +125,14 @@ Manually process lottery results with Taiwan lottery winning numbers.
 ```
 
 **Parameters:**
+
 - `lotteryDate` (string, required): Lottery date in YYYY-MM-DD format
 - `specialPrize` (string, required): 8-digit special prize number
 - `grandPrize` (string, required): 8-digit grand prize number
 - `firstPrize` (string, required): 8-digit first prize number
 
 **Validations:**
+
 - All prize numbers must be exactly 8 digits
 - Date must be in YYYY-MM-DD format
 - All fields are required
@@ -138,6 +140,7 @@ Manually process lottery results with Taiwan lottery winning numbers.
 #### Response
 
 **Success Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -173,6 +176,7 @@ Manually process lottery results with Taiwan lottery winning numbers.
 ```
 
 **Error Response (400 Bad Request):**
+
 ```json
 {
   "error": "All prize numbers must be 8 digits"
@@ -188,6 +192,7 @@ Manually process lottery results with Taiwan lottery winning numbers.
 #### Example Usage
 
 **Local Development:**
+
 ```bash
 curl -X POST http://localhost:3000/api/oracle/process-lottery \
   -H "Content-Type: application/json" \
@@ -200,6 +205,7 @@ curl -X POST http://localhost:3000/api/oracle/process-lottery \
 ```
 
 **ROFL Deployment:**
+
 ```bash
 curl -X POST https://p3000.m<machine-id>.<region>.rofl.app/api/oracle/process-lottery \
   -H "Content-Type: application/json" \
@@ -218,6 +224,7 @@ When you process lottery results:
 1. **Query Invoices**: The system queries all invoices for the specified lottery date that haven't been drawn yet (`drawn = false`)
 
 2. **Match Prizes**: Each invoice number is matched against all prize tiers:
+
    - **Special Prize**: Full 8-digit match → 10M TWD
    - **Grand Prize**: Full 8-digit match → 2M TWD
    - **First Prize**: Full 8-digit match → 200K TWD
@@ -228,6 +235,7 @@ When you process lottery results:
    - **Sixth Prize**: Last 3 digits match first prize → 200 TWD
 
 3. **Process Winners**: For each winning invoice:
+
    - Call smart contract's `notifyLotteryResult(tokenTypeId, prizeAmount)` on-chain
    - Mark invoice as `drawn = true` in database
    - Record `prize_amount` in database
@@ -242,120 +250,61 @@ When you process lottery results:
 
 Given `firstPrize = "12345678"`:
 
-| Invoice Number | Match | Prize Tier | Prize Amount |
-|---------------|-------|-----------|-------------|
-| 12345678 | Full match | First Prize | 200,000 TWD |
-| 22345678 | Last 7 digits | Second Prize | 40,000 TWD |
-| 00345678 | Last 6 digits | Third Prize | 10,000 TWD |
-| 99945678 | Last 5 digits | Fourth Prize | 4,000 TWD |
-| 88885678 | Last 4 digits | Fifth Prize | 1,000 TWD |
-| 77777678 | Last 3 digits | Sixth Prize | 200 TWD |
-| 11111111 | No match | No Prize | 0 TWD |
+| Invoice Number | Match         | Prize Tier   | Prize Amount |
+| -------------- | ------------- | ------------ | ------------ |
+| 12345678       | Full match    | First Prize  | 200,000 TWD  |
+| 22345678       | Last 7 digits | Second Prize | 40,000 TWD   |
+| 00345678       | Last 6 digits | Third Prize  | 10,000 TWD   |
+| 99945678       | Last 5 digits | Fourth Prize | 4,000 TWD    |
+| 88885678       | Last 4 digits | Fifth Prize  | 1,000 TWD    |
+| 77777678       | Last 3 digits | Sixth Prize  | 200 TWD      |
+| 11111111       | No match      | No Prize     | 0 TWD        |
 
 ### Testing
 
-The Oracle API can be tested using the provided test scripts:
+The project includes a comprehensive, self-contained integration test script that resets the database, runs the server, and executes a suite of API tests.
 
-```bash
-# Local testing
-./test-api.sh
+#### Prerequisites
 
-# ROFL deployment testing
-./test-rofl-api.sh
-```
-
-The test suite includes:
-- Validation of missing required fields
-- Validation of invalid date formats
-- Validation of invalid prize numbers (not 8 digits)
-- Valid lottery processing with sample winning numbers
-
-### Security Considerations
-
-**Production Deployment:**
-This endpoint should be protected in production environments:
-
-1. **API Key Authentication**: Require an API key in request headers
-2. **IP Whitelist**: Only allow requests from trusted Oracle IPs
-3. **Signature Verification**: Require cryptographic signature from Oracle private key
-4. **Rate Limiting**: Prevent abuse with rate limiting
-5. **Audit Logging**: Log all lottery processing attempts
-
-**Example with API Key:**
-```javascript
-// In oracle.js route
-router.post("/process-lottery", async (req, res) => {
-  // Verify API key
-  const apiKey = req.headers['x-api-key'];
-  if (apiKey !== process.env.ORACLE_API_KEY) {
-    return res.status(403).json({ error: "Unauthorized" });
-  }
-  // ... rest of the code
-});
-```
-
-## Advanced Testing: Admin & Pool Management
-
-To test endpoints that require special permissions (like registering a pool or updating its settings), you need to generate a cryptographic signature. The following steps guide you through this process.
-
-### Step 1: Configure Environment for Signing
-
-Before generating signatures, ensure your `backend/.env` file contains the necessary private keys. Refer to `.env.example`.
-
-```env
-# The private key for the address that has the ADMIN_ROLE on-chain
-ADMIN_PRIVATE_KEY=0x...
-
-# The private key for the pool's beneficiary address
-BENEFICIARY_PRIVATE_KEY=0x...
-
-# The beneficiary's public address
-BENEFICIARY_ADDRESS=0x...
-```
-
-### Step 2: Register a New Pool (Admin Action)
-
-This action requires a signature from the `ADMIN_ADDRESS`.
-
-1.  **Customize & Run the Signature Script**:
-    The `createSignature.js` script reads your `.env` file to generate the correct signature and `curl` command.
+1.  **Install Dependencies**: Ensure all Node.js dependencies are installed:
 
     ```bash
-    node createSignature.js
+    npm install
     ```
 
-2.  **Execute the Output Command**:
-    Copy the `curl` command generated by the script and run it in your terminal. It will look like this:
-    ```bash
-    curl -X POST http://localhost:3000/api/pools/register -H "Content-Type: application/json" -d '{"poolId":2,"beneficiary":"0x...","name":"My Second Charity Pool","lotteryMonth":4,"signature":"0x..."}'
+2.  **Environment Variables**: For full test coverage, including tests for admin and beneficiary-only endpoints, you must have a `.env` file in the `backend` directory with the following variables set:
+    ```env
+    ADMIN_PRIVATE_KEY=0x...
+    BENEFICIARY_PRIVATE_KEY=0x...
     ```
-    This will register a new pool on the blockchain.
+    If these keys are not provided, tests requiring valid signatures will be skipped.
 
-### Step 3: Update Pool Donation Percentage (Beneficiary Action)
+#### Running the Tests
 
-This action requires a signature from the pool's `BENEFICIARY_ADDRESS`.
-
-1.  **Customize & Run the Signature Script**:
-    Open the `createDonationSignature.js` script and configure the `poolId` and `minDonationPercent` you wish to set. Then run the script:
-
-    ```bash
-    node createDonationSignature.js
-    ```
-
-2.  **Execute the Output Command**:
-    Copy and run the `curl` command generated by the script. It will look like this:
-    ```bash
-    curl -X PUT http://localhost:3000/api/pools/1/min-donation-percent -H "Content-Type: application/json" -d '{"minDonationPercent":30,"signature":"0x..."}'
-    ```
-    This will update the specified pool's settings on the blockchain.
-
-### Step 4: Run Standard API Tests
-
-After ensuring at least one pool is registered, you can run the standard test script:
+To run the entire test suite, simply execute the `test-api.sh` script from the `backend` directory:
 
 ```bash
 ./test-api.sh
 ```
+
+The script will automatically:
+
+1.  Kill any old server processes.
+2.  Reset the SQLite database to a clean state.
+3.  Start the backend server in the background.
+4.  Wait for the server to become healthy.
+5.  Run all API tests.
+6.  Shut down the server and provide a summary of test results.
+
+#### Expected Failures in Local Environment
+
+When running tests locally, it is **normal and expected** for tests that interact with the ROFL (Oasis Runtime Off-chain Logic) service to fail. This is because a local `rofl-appd` instance is not available.
+
+Specifically, the following test will fail:
+
+- **Invoice Registration**: This test attempts to mint an NFT by submitting a transaction to the ROFL service, which will not be reachable, resulting in a connection error.
+
+These failures confirm that the backend is correctly attempting to communicate with the ROFL service.
 
 ## Using the ROFL API
 

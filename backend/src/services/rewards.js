@@ -2,6 +2,22 @@ import { ethers } from "ethers";
 import { poolV2 as poolContract, adminWallet } from "../config/contracts.js";
 import logger from "../utils/logger.js";
 
+/**
+ * Verifies a signature and returns the signer's address.
+ * Throws an error if the signature is invalid.
+ * @param {string} message - The message that was signed.
+ * @param {string} signature - The signature to verify.
+ * @returns {string} The address of the signer.
+ */
+function verifySignature(message, signature) {
+  try {
+    return ethers.verifyMessage(message, signature);
+  } catch (error) {
+    // Re-throw a generic error to be caught by the route handler.
+    throw new Error("Invalid signature.");
+  }
+}
+
 class RewardsService {
 
   /**
@@ -13,7 +29,7 @@ class RewardsService {
 
       // 1. Verify the signature from the wallet owner
       const message = `Claim reward for token type ${tokenTypeId}`;
-      const signerAddress = ethers.verifyMessage(message, signature);
+      const signerAddress = verifySignature(message, signature);
 
       if (signerAddress.toLowerCase() !== walletAddress.toLowerCase()) {
         throw new Error("Invalid signature. Caller is not the wallet owner.");

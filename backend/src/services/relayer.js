@@ -1,13 +1,40 @@
 import { ethers } from "ethers";
-import { invoiceTokenV2, relayerWallet, provider } from "../config/contracts.js";
+import axios from "axios";
+import { invoiceTokenV2, provider } from "../config/contracts.js";
 import db from "../db/db.js";
 import logger from "../utils/logger.js";
 
+const ROFL_APPD_URL = "http://localhost/rofl/v1/tx/sign-submit";
+const ROFL_APPD_SOCKET = "/run/rofl-appd.sock";
+
 class RelayerService {
-  constructor() {
-    this.minBalance = ethers.parseEther(
-      process.env.MIN_RELAYER_BALANCE || "0.1"
-    );
+  /**
+   * Submit transaction to rofl-appd
+   */
+  async submitRoflTx(to, data) {
+    const payload = {
+      tx: {
+        kind: "eth",
+        data: {
+          gas_limit: 200000,
+          to,
+          value: 0,
+          data,
+        },
+      },
+    };
+
+    try {
+      const response = await axios.post(ROFL_APPD_URL, payload, {
+        socketPath: ROFL_APPD_SOCKET,
+      });
+      return response.data;
+    } catch (error) {
+      logger.error("Failed to submit transaction to rofl-appd", {
+        error: error.response ? error.response.data : error.message,
+      });
+      throw new Error("Failed to submit transaction to rofl-appd");
+    }
   }
 
   /**
@@ -15,50 +42,51 @@ class RelayerService {
    */
   async mintInvoiceNFT(userAddress, donationPercent, poolId, lotteryDay) {
     try {
-      logger.info("Minting NFT", {
+      logger.info("Minting NFT via rofl-appd", {
         userAddress,
         donationPercent,
         poolId,
         lotteryDay,
       });
 
-      // Check Relayer balance
-      await this.checkBalance();
-
-      // Execute mint
-      const tx = await invoiceTokenV2.mint(
+      // ABI-encode the function call
+      const data = invoiceTokenV2.interface.encodeFunctionData("mint", [
         userAddress,
         donationPercent,
         poolId,
         Math.floor(new Date(lotteryDay).getTime() / 1000),
         1,
-        {
-          gasLimit: 200000,
-        }
+      ]);
+
+      // Submit the transaction to rofl-appd
+      const roflResponse = await this.submitRoflTx(
+        invoiceTokenV2.address,
+        data
       );
 
-      logger.info("Mint transaction sent", { txHash: tx.hash });
+      const txHash = roflResponse.tx_hash;
+      logger.info("Mint transaction sent via rofl-appd", { txHash });
 
       // Log transaction
       await this.logTransaction(
-        tx.hash,
+        txHash,
         "mint",
-        relayerWallet.address,
+        "rofl-appd", // The transaction is sent from rofl-appd
         userAddress,
         "pending"
       );
 
       // Wait for confirmation
-      const receipt = await tx.wait();
+      const receipt = await provider.waitForTransaction(txHash);
 
       logger.info("Mint transaction confirmed", {
-        txHash: tx.hash,
+        txHash,
         blockNumber: receipt.blockNumber,
       });
 
       // Update transaction status
       await this.updateTransactionStatus(
-        tx.hash,
+        txHash,
         "success",
         receipt.gasUsed,
         receipt.gasPrice
@@ -69,7 +97,7 @@ class RelayerService {
 
       return {
         success: true,
-        txHash: tx.hash,
+        txHash,
         tokenTypeId,
         gasUsed: receipt.gasUsed.toString(),
       };
@@ -109,29 +137,6 @@ class RelayerService {
     }
 
     throw new Error("TokenTypeId not found in receipt");
-  }
-
-  /**
-   * Check Relayer balance
-   */
-  async checkBalance() {
-    const balance = await provider.getBalance(relayerWallet.address);
-
-    logger.info("Relayer balance", {
-      balance: ethers.formatEther(balance),
-      address: relayerWallet.address,
-    });
-
-    if (balance < this.minBalance) {
-      const message = `Relayer balance is low: ${ethers.formatEther(
-        balance
-      )} ETH`;
-      logger.error(message);
-      await this.sendAlert("LOW_BALANCE", message);
-      throw new Error(message);
-    }
-
-    return balance;
   }
 
   /**

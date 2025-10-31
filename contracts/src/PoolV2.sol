@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "./InvoiceToken.sol";
+import "./InvoiceTokenV2.sol";
 
 /**
  * @title Pool
@@ -14,7 +14,7 @@ contract PoolV2 is AccessControl, ReentrancyGuard {
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
     bytes32 public constant CLAIM_OPERATOR_ROLE = keccak256("CLAIM_OPERATOR_ROLE");
 
-    InvoiceToken public immutable invoiceToken;
+    InvoiceTokenV2 public immutable invoiceToken;
 
     // Pool information
     struct PoolInfo {
@@ -103,7 +103,7 @@ contract PoolV2 is AccessControl, ReentrancyGuard {
         _grantRole(ORACLE_ROLE, oracle);
         _grantRole(CLAIM_OPERATOR_ROLE, claimOperator);
         
-        invoiceToken = InvoiceToken(_invoiceToken);
+        invoiceToken = InvoiceTokenV2(_invoiceToken);
     }
 
     /**

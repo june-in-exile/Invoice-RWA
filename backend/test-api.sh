@@ -1,5 +1,94 @@
 #!/bin/bash
 
+# Source environment variables from .env file if it exists
+if [ -f .env ]; then
+  export $(cat .env | sed 's/#.*//g' | xargs)
+fi
+
+# =============================================================================
+# Configuration
+# =============================================================================
+
+BASE_URL="${BASE_URL:-http://localhost:3000}"
+SKIP_INVOICE=false
+VERBOSE=false
+SERVER_PID=0
+
+# =============================================================================
+# Cleanup and Server Control
+# =============================================================================
+
+# Function to kill the server
+cleanup() {
+  echo "\nCleaning up..."
+  if [ $SERVER_PID -ne 0 ]; then
+    kill $SERVER_PID 2>/dev/null
+    echo "Server process (PID: $SERVER_PID) killed."
+  fi
+}
+
+# Set trap to run cleanup on exit
+trap cleanup EXIT
+
+# Kill any lingering server processes
+echo "Checking for lingering server processes..."
+pkill -f "node src/index.js" || true
+
+# =============================================================================
+# Database Reset
+# =============================================================================
+
+DB_DIR="./data"
+DB_FILE="$DB_DIR/invoice_rwa.db"
+
+# Ensure data directory exists
+mkdir -p "$DB_DIR"
+echo "Data directory ensured."
+
+if [ -f "$DB_FILE" ]; then
+  echo "Resetting database..."
+  rm "$DB_FILE"
+  echo "Database file removed."
+fi
+
+# Initialize database schema
+if [ -f "package.json" ]; then
+  npm run db:init
+  echo "Database initialized."
+else
+  echo "Error: package.json not found. Cannot initialize database."
+  exit 1
+fi
+
+# =============================================================================
+# Server Startup
+# =============================================================================
+
+echo "\nStarting backend server in background..."
+
+# Start the server and capture its PID
+npm run dev & 
+SERVER_PID=$!
+
+echo "Server started with PID: $SERVER_PID"
+echo "Waiting for server to become healthy..."
+
+# Wait for the server to be ready
+max_wait=30
+waited=0
+until $(curl --output /dev/null --silent --head --fail $BASE_URL/health); do
+  if [ $waited -ge $max_wait ]; then
+    echo "Server failed to start within $max_wait seconds."
+    exit 1
+  fi
+  printf '.'
+  sleep 1
+  waited=$((waited + 1))
+done
+
+echo "\nServer is healthy and ready for tests."
+
+
 # =============================================================================
 # Invoice-RWA Backend API Testing Script
 # =============================================================================
@@ -475,6 +564,9 @@ echo ""
 # Test 16: Invoice Registration (Optional - requires blockchain)
 # =============================================================================
 
+# Initialize token_id variable for later use
+token_id=""
+
 if [ "$SKIP_INVOICE" = false ]; then
   print_warning "Invoice registration will interact with blockchain"
   print_info "This test may fail if:"
@@ -585,6 +677,61 @@ deactivate_pool_data='{
 }'
 run_test "Deactivate Pool (Invalid Signature)" "DELETE" "/api/pools/$POOL_ID" "$deactivate_pool_data" 403
 
+# =============================================================================
+# Test 21: Pool Management (Valid Signatures)
+# =============================================================================
+
+print_header "Testing Pool Management with Valid Signatures"
+
+# Check if necessary secrets are available in the environment
+if [ -z "$ADMIN_PRIVATE_KEY" ] || [ -z "$BENEFICIARY_PRIVATE_KEY" ]; then
+  print_warning "ADMIN_PRIVATE_KEY or BENEFICIARY_PRIVATE_KEY not set in environment."
+  print_skip "Skipping valid signature tests."
+  TOTAL_TESTS=$((TOTAL_TESTS + 2))
+  TESTS_SKIPPED=$((TESTS_SKIPPED + 2))
+else
+  print_info "ADMIN_PRIVATE_KEY and BENEFICIARY_PRIVATE_KEY found. Running signature tests."
+
+  # Test 21.1: Register a new pool with a valid admin signature
+  POOL_ID_NEW=2
+  BENEFICIARY_ADDR_NEW="0x1111111111111111111111111111111111111111"
+  POOL_NAME_NEW="Signature Test Pool"
+  LOTTERY_MONTH_NEW=2
+
+  print_info "Generating signature for new pool registration..."
+  VALID_ADMIN_SIGNATURE=$(node createSignature.js $POOL_ID_NEW $BENEFICIARY_ADDR_NEW $POOL_NAME_NEW $LOTTERY_MONTH_NEW)
+
+  if [ -z "$VALID_ADMIN_SIGNATURE" ]; then
+    print_failure "Failed to generate admin signature. Check createSignature.js and .env file."
+  else
+    new_pool_data="{
+      \"poolId\": $POOL_ID_NEW,
+      \"beneficiary\": \"$BENEFICIARY_ADDR_NEW\",
+      \"name\": \"$POOL_NAME_NEW\",
+      \"lotteryMonth\": $LOTTERY_MONTH_NEW,
+      \"signature\": \"$VALID_ADMIN_SIGNATURE\"
+    }"
+    run_test "Register New Pool (Valid Admin Signature)" "POST" "/api/pools/register" "$new_pool_data" 201
+  fi
+
+  # Test 21.2: Update min donation percent with a valid beneficiary signature
+  POOL_ID_UPDATE=1
+  NEW_DONATION_PERCENT=35
+
+  print_info "Generating signature for updating min donation percent..."
+  VALID_BENEFICIARY_SIGNATURE=$(node createDonationSignature.js $POOL_ID_UPDATE $NEW_DONATION_PERCENT)
+
+  if [ -z "$VALID_BENEFICIARY_SIGNATURE" ]; then
+    print_failure "Failed to generate beneficiary signature. Check createDonationSignature.js and .env file."
+  else
+    update_percent_data="{
+      \"minDonationPercent\": $NEW_DONATION_PERCENT,
+      \"signature\": \"$VALID_BENEFICIARY_SIGNATURE\"
+    }"
+    run_test "Update Min Donation Percent (Valid Beneficiary Signature)" "PUT" "/api/pools/$POOL_ID_UPDATE/min-donation-percent" "$update_percent_data" 200
+  fi
+fi
+
 echo ""
 
 # =============================================================================
@@ -593,9 +740,17 @@ echo ""
 
 print_header "Testing Token API"
 
-TOKEN_TYPE_ID_TOKEN="1" # Assuming a token type ID for testing
-run_test "Get Token Type Data" "GET" "/api/tokens/$TOKEN_TYPE_ID_TOKEN" "" 200
-run_test "Check if Token is Drawn" "GET" "/api/tokens/$TOKEN_TYPE_ID_TOKEN/drawn" "" 200
+# Only run token API tests if we have a valid token_id from invoice registration
+if [ -n "$token_id" ] && [ "$token_id" != "null" ] && [ "$token_id" != "" ]; then
+  TOKEN_TYPE_ID_TOKEN="$token_id"
+  run_test "Get Token Type Data" "GET" "/api/tokens/$TOKEN_TYPE_ID_TOKEN" "" 200
+  run_test "Check if Token is Drawn" "GET" "/api/tokens/$TOKEN_TYPE_ID_TOKEN/drawn" "" 200
+else
+  print_warning "No token types exist (invoice registration was skipped or failed)"
+  print_skip "Token API tests require successful invoice registration"
+  TOTAL_TESTS=$((TOTAL_TESTS + 2))
+  TESTS_SKIPPED=$((TESTS_SKIPPED + 2))
+fi
 
 echo ""
 

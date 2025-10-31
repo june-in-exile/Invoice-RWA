@@ -41,9 +41,9 @@ deployments:
       max_expiration: 3
     secrets:
       - name: INVOICE_TOKEN_V2_ADDRESS
-        value: pGJwa1ggk4SUkx05hBtSmIGiw+E5a2WlovdnUAk+8K7+xBEsAAhkbmFtZVgok/KW9QC8BlJHpf3DtAeZG7loQtskzKaTmzZoLaG4sreJbIBOgAg1U2Vub25jZU+4vR0mvZ+NfMsZSY1B03pldmFsdWVYOiQhBEgk6oU9dnUIH6xeyX5R9jou/Oxb1RD1WEqVP4vWxceA+NWEmv1dfclyL7lkb89bDwZG0xpuSuc=
+        value: pGJwa1ggG+BGfoF9LTVcca5UAhdFNaKP7TSskE2A1iGCR18gmABkbmFtZVgo8m4GpX9h9vQt4WZHUMCWyjGta2Vei7nif6Ic3nbMxFCVXMYouVlPL2Vub25jZU/6+O3xshttkx3GIiAtSE1ldmFsdWVYOi31hnzKVD2vk+3QyZtvh0ofRc/DClWvUbM+03dhRxtn2jerw9n6v+oD+BcQijUFygBb4U0LIZysQx8=
       - name: POOL_V2_ADDRESS
-        value: pGJwa1gg1MtYDqHUmAu0wvodJphfb9wR335JGtIO/DaLZgeqf2FkbmFtZVgfJ2kV6Jl2opNWOE4LYSapoDdhpYhmUm3eH8CTXZjv5GVub25jZU+smrvIZ2ASXdv08Ozk4kFldmFsdWVYOsheRyXa86CZqSxYsDzQPN8eOgWa1+8gmOyFEUNZ/9j1dGV188zFzkkBNwMk4cAUg6UxW0SPKRS1tm8=
+        value: pGJwa1ggCRymYAIGC/I1/uxiegEFQ2kq5UNtifIY+tfDR+otMklkbmFtZVgf2mqY631INlIXrhW2jL/YppnmG8/smaaCeNQA+EDCdWVub25jZU9MKImFa3hIqGjTRrlo9ONldmFsdWVYOpBn4+ktpmI4QTya2ewVSQz89c3iRINqHks4LzRE+vAfF3u6TpC9Csf5lhQFuJiVD3asnUhoRjgzZ30=
       - name: ADMIN_PRIVATE_KEY
         value: pGJwa1ggN6aHGnK3A0VsA+A7NupCVr1KmStWRqb4vXvSYjOpGkZkbmFtZVghKZMC8cQYYqm7r07EnYoOIKPh4HpXGvg+KL/gzAhg12GgZW5vbmNlT1WpKiRBKgDpyJf4t8uLVGV2YWx1ZVhSlYe+lgkxY4NAioudOUxafnKiKBvneIzp2wFRp2d12xyv7DhmlJs3FS4czooLpenGCmw4mGxrNYrE/jKHjWSDS1HXhLO/Ag5K+DbgyB4OY0kvxw==
       - name: ADMIN_ADDRESS

@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Source environment variables from .env file if it exists
+if [ -f .env ]; then
+  export $(cat .env | sed 's/#.*//g' | xargs)
+fi
+
 # =============================================================================
 # Invoice-RWA Backend ROFL Deployment API Testing Script
 # =============================================================================
@@ -452,10 +457,10 @@ invalid_sig_response=$(curl $CURL_OPTS -s -w "\n%{http_code}" -X PUT "${BASE_URL
   -d "$invalid_sig_data")
 
 invalid_sig_code=$(echo "$invalid_sig_response" | tail -n1)
-if [ "$invalid_sig_code" -eq 403 ] || [ "$invalid_sig_code" -eq 500 ]; then
+if [ "$invalid_sig_code" -eq 403 ]; then
   print_success "Invalid signature correctly rejected (HTTP $invalid_sig_code)"
 else
-  print_warning "Invalid signature returned HTTP $invalid_sig_code (expected 403 or 500)"
+  print_warning "Invalid signature returned HTTP $invalid_sig_code (expected 403)"
 fi
 
 echo ""
@@ -609,6 +614,61 @@ deactivate_pool_data='{
   "signature": "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 }'
 run_test "Deactivate Pool (Invalid Signature)" "DELETE" "/api/pools/$POOL_ID" "$deactivate_pool_data" 403
+
+# =============================================================================
+# Test 21: Pool Management (Valid Signatures)
+# =============================================================================
+
+print_header "Testing Pool Management with Valid Signatures"
+
+# Check if necessary secrets are available in the environment
+if [ -z "$ADMIN_PRIVATE_KEY" ] || [ -z "$BENEFICIARY_PRIVATE_KEY" ]; then
+  print_warning "ADMIN_PRIVATE_KEY or BENEFICIARY_PRIVATE_KEY not set in environment."
+  print_skip "Skipping valid signature tests."
+  TOTAL_TESTS=$((TOTAL_TESTS + 2))
+  TESTS_SKIPPED=$((TESTS_SKIPPED + 2))
+else
+  print_info "ADMIN_PRIVATE_KEY and BENEFICIARY_PRIVATE_KEY found. Running signature tests."
+
+  # Test 21.1: Register a new pool with a valid admin signature
+  POOL_ID_NEW=3
+  BENEFICIARY_ADDR_NEW="0x1111111111111111111111111111111111111111"
+  POOL_NAME_NEW="Signature Test Pool"
+  LOTTERY_MONTH_NEW=2
+
+  print_info "Generating signature for new pool registration..."
+  VALID_ADMIN_SIGNATURE=$(node createSignature.js $POOL_ID_NEW $BENEFICIARY_ADDR_NEW $POOL_NAME_NEW $LOTTERY_MONTH_NEW)
+
+  if [ -z "$VALID_ADMIN_SIGNATURE" ]; then
+    print_failure "Failed to generate admin signature. Check createSignature.js and .env file."
+  else
+    new_pool_data="{
+      \"poolId\": $POOL_ID_NEW,
+      \"beneficiary\": \"$BENEFICIARY_ADDR_NEW\",
+      \"name\": \"$POOL_NAME_NEW\",
+      \"lotteryMonth\": $LOTTERY_MONTH_NEW,
+      \"signature\": \"$VALID_ADMIN_SIGNATURE\"
+    }"
+    run_test "Register New Pool (Valid Admin Signature)" "POST" "/api/pools/register" "$new_pool_data" 201
+  fi
+
+  # Test 21.2: Update min donation percent with a valid beneficiary signature
+  POOL_ID_UPDATE=1
+  NEW_DONATION_PERCENT=35
+
+  print_info "Generating signature for updating min donation percent..."
+  VALID_BENEFICIARY_SIGNATURE=$(node createDonationSignature.js $POOL_ID_UPDATE $NEW_DONATION_PERCENT)
+
+  if [ -z "$VALID_BENEFICIARY_SIGNATURE" ]; then
+    print_failure "Failed to generate beneficiary signature. Check createDonationSignature.js and .env file."
+  else
+    update_percent_data="{
+      \"minDonationPercent\": $NEW_DONATION_PERCENT,
+      \"signature\": \"$VALID_BENEFICIARY_SIGNATURE\"
+    }"
+    run_test "Update Min Donation Percent (Valid Beneficiary Signature)" "PUT" "/api/pools/$POOL_ID_UPDATE/min-donation-percent" "$update_percent_data" 200
+  fi
+fi
 
 echo ""
 
