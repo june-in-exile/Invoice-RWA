@@ -94,6 +94,218 @@ The Oracle API allows manual input of Taiwan lottery winning numbers to automati
 
 The Taiwan invoice lottery has the following prize tiers:
 
+| Prize Tier | Match Criteria | Prize Amount (TWD) |
+|------------|----------------|-------------------|
+| Special Prize | Full 8 digits match special prize number | 10,000,000 |
+| Grand Prize | Full 8 digits match grand prize number | 2,000,000 |
+| First Prize | Full 8 digits match first prize number | 200,000 |
+| Second Prize | Last 7 digits match first prize | 40,000 |
+| Third Prize | Last 6 digits match first prize | 10,000 |
+| Fourth Prize | Last 5 digits match first prize | 4,000 |
+| Fifth Prize | Last 4 digits match first prize | 1,000 |
+| Sixth Prize | Last 3 digits match first prize | 200 |
+
+**Important:** Only 3 winning numbers need to be provided (Special Prize, Grand Prize, First Prize). All other prize tiers (2nd-6th) are automatically calculated based on the last N digits of the First Prize number.
+
+### API Endpoint
+
+**`POST /api/oracle/process-lottery`**
+
+Manually process lottery results with Taiwan lottery winning numbers.
+
+#### Request Body
+
+```json
+{
+  "lotteryDate": "2025-11-25",
+  "specialPrize": "53960536",
+  "grandPrize": "51509866",
+  "firstPrize": "12345678"
+}
+```
+
+**Parameters:**
+- `lotteryDate` (string, required): Lottery date in YYYY-MM-DD format
+- `specialPrize` (string, required): 8-digit special prize number
+- `grandPrize` (string, required): 8-digit grand prize number
+- `firstPrize` (string, required): 8-digit first prize number
+
+**Validations:**
+- All prize numbers must be exactly 8 digits
+- Date must be in YYYY-MM-DD format
+- All fields are required
+
+#### Response
+
+**Success Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Lottery results processed successfully",
+  "data": {
+    "success": true,
+    "processed": 3,
+    "results": [
+      {
+        "success": true,
+        "invoiceNumber": "12345678",
+        "tokenTypeId": "202511251",
+        "prizeName": "First Prize",
+        "prizeAmount": 200000,
+        "txHash": "0x..."
+      },
+      {
+        "success": true,
+        "invoiceNumber": "12345670",
+        "tokenTypeId": "202511252",
+        "prizeName": "Sixth Prize",
+        "prizeAmount": 200,
+        "txHash": "0x..."
+      },
+      {
+        "success": false,
+        "invoiceNumber": "12345671",
+        "error": "Transaction failed"
+      }
+    ]
+  }
+}
+```
+
+**Error Response (400 Bad Request):**
+```json
+{
+  "error": "All prize numbers must be 8 digits"
+}
+```
+
+```json
+{
+  "error": "Missing required fields: lotteryDate, specialPrize, grandPrize, firstPrize"
+}
+```
+
+#### Example Usage
+
+**Local Development:**
+```bash
+curl -X POST http://localhost:3000/api/oracle/process-lottery \
+  -H "Content-Type: application/json" \
+  -d '{
+    "lotteryDate": "2025-11-25",
+    "specialPrize": "53960536",
+    "grandPrize": "51509866",
+    "firstPrize": "12345678"
+  }'
+```
+
+**ROFL Deployment:**
+```bash
+curl -X POST https://p3000.m<machine-id>.<region>.rofl.app/api/oracle/process-lottery \
+  -H "Content-Type: application/json" \
+  -d '{
+    "lotteryDate": "2025-11-25",
+    "specialPrize": "53960536",
+    "grandPrize": "51509866",
+    "firstPrize": "12345678"
+  }'
+```
+
+### How It Works
+
+When you process lottery results:
+
+1. **Query Invoices**: The system queries all invoices for the specified lottery date that haven't been drawn yet (`drawn = false`)
+
+2. **Match Prizes**: Each invoice number is matched against all prize tiers:
+   - **Special Prize**: Full 8-digit match → 10M TWD
+   - **Grand Prize**: Full 8-digit match → 2M TWD
+   - **First Prize**: Full 8-digit match → 200K TWD
+   - **Second Prize**: Last 7 digits match first prize → 40K TWD
+   - **Third Prize**: Last 6 digits match first prize → 10K TWD
+   - **Fourth Prize**: Last 5 digits match first prize → 4K TWD
+   - **Fifth Prize**: Last 4 digits match first prize → 1K TWD
+   - **Sixth Prize**: Last 3 digits match first prize → 200 TWD
+
+3. **Process Winners**: For each winning invoice:
+   - Call smart contract's `notifyLotteryResult(tokenTypeId, prizeAmount)` on-chain
+   - Mark invoice as `drawn = true` in database
+   - Record `prize_amount` in database
+   - Return transaction hash and prize details
+
+4. **Return Results**: Returns a summary with:
+   - Total number of processed winners
+   - Individual results for each winning invoice
+   - Success/failure status for each on-chain transaction
+
+### Example Matching Logic
+
+Given `firstPrize = "12345678"`:
+
+| Invoice Number | Match | Prize Tier | Prize Amount |
+|---------------|-------|-----------|-------------|
+| 12345678 | Full match | First Prize | 200,000 TWD |
+| 22345678 | Last 7 digits | Second Prize | 40,000 TWD |
+| 00345678 | Last 6 digits | Third Prize | 10,000 TWD |
+| 99945678 | Last 5 digits | Fourth Prize | 4,000 TWD |
+| 88885678 | Last 4 digits | Fifth Prize | 1,000 TWD |
+| 77777678 | Last 3 digits | Sixth Prize | 200 TWD |
+| 11111111 | No match | No Prize | 0 TWD |
+
+### Testing
+
+The Oracle API can be tested using the provided test scripts:
+
+```bash
+# Local testing
+./test-api.sh
+
+# ROFL deployment testing
+./test-rofl-api.sh
+```
+
+The test suite includes:
+- Validation of missing required fields
+- Validation of invalid date formats
+- Validation of invalid prize numbers (not 8 digits)
+- Valid lottery processing with sample winning numbers
+
+### Security Considerations
+
+**Production Deployment:**
+This endpoint should be protected in production environments:
+
+1. **API Key Authentication**: Require an API key in request headers
+2. **IP Whitelist**: Only allow requests from trusted Oracle IPs
+3. **Signature Verification**: Require cryptographic signature from Oracle private key
+4. **Rate Limiting**: Prevent abuse with rate limiting
+5. **Audit Logging**: Log all lottery processing attempts
+
+**Example with API Key:**
+```javascript
+// In oracle.js route
+router.post("/process-lottery", async (req, res) => {
+  // Verify API key
+  const apiKey = req.headers['x-api-key'];
+  if (apiKey !== process.env.ORACLE_API_KEY) {
+    return res.status(403).json({ error: "Unauthorized" });
+  }
+  // ... rest of the code
+});
+```
+
+## Advanced Testing: Admin & Pool Management
+
+- `POST /api/oracle/process-lottery` - Manually process lottery results with winning numbers
+
+## Oracle: Manual Lottery Processing
+
+The Oracle API allows manual input of Taiwan lottery winning numbers to automatically process and distribute prizes.
+
+### Prize Structure
+
+The Taiwan invoice lottery has the following prize tiers:
+
 | Prize Tier    | Match Criteria                           | Prize Amount (TWD) |
 | ------------- | ---------------------------------------- | ------------------ |
 | Special Prize | Full 8 digits match special prize number | 10,000,000         |
