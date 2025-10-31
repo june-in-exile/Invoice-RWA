@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // --- Web3 Imports ---
@@ -61,11 +61,50 @@ const AnimatedRoutes: React.FC = () => {
   );
 };
 
+// --- AutoRedirect: 檢查用戶是否已註冊，如果已註冊且在首頁則跳轉 ---
+const AutoRedirect: React.FC = () => {
+  const { useIsActive, useAccount } = hooks;
+  const isActive = useIsActive();
+  const account = useAccount();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  React.useEffect(() => {
+    const checkUserRegistration = async (walletAddress: string) => {
+      try {
+        const response = await fetch(`/api/users/${walletAddress}`);
+        
+        if (response.ok) {
+          const result = await response.json();
+          // 如果用戶已註冊且目前在首頁，自動跳轉到 charities
+          if (result.success && location.pathname === '/') {
+            console.log('用戶已註冊，自動跳轉到 charities');
+            navigate('/charities');
+          }
+        }
+      } catch (error) {
+        console.error('檢查用戶註冊狀態失敗:', error);
+      }
+    };
+
+    // 只在錢包連接且有 account 時檢查
+    if (isActive && account) {
+      const walletAddress = (typeof account === 'string' ? account : (account as any)?.address || account) as string;
+      if (walletAddress) {
+        checkUserRegistration(walletAddress);
+      }
+    }
+  }, [isActive, account, location.pathname, navigate]);
+
+  return null;
+};
+
 // --- Updated App Component ---
 const App: React.FC = () => {
   return (
     <Web3ReactProvider connectors={connectors}>
       <HashRouter>
+        <AutoRedirect />
         <AnimatedRoutes />
       </HashRouter>
     </Web3ReactProvider>

@@ -65,11 +65,25 @@ const Onboarding: React.FC = () => {
   // --- (原有邏輯 - 處理載具) ---
   const isManualInputValid = manualBarcode.trim().length === 7;
   const isUploadValid = image !== null;
-  const canStart = (activeTab === 'upload' && isUploadValid) || (activeTab === 'manual' && isManualInputValid);
+  const hasCarrierData = (activeTab === 'upload' && isUploadValid) || (activeTab === 'manual' && isManualInputValid);
+  // 必須同時有載具資料和錢包連接才能開始
+  const canStart = hasCarrierData && isActive && account;
 
-  // --- "Flow A" (載具登入) 的處理函數 ---
-  const handleStart = () => {
+  // --- "註冊發票" 的處理函數 ---
+  const handleStart = async () => {
     if (!canStart) return;
+    
+    // 檢查錢包是否連接
+    if (!isActive || !account) {
+      alert('請先連接錢包');
+      return;
+    }
+    
+    // 檢查是否有載具資料
+    if (!hasCarrierData) {
+      alert('請先上傳或輸入載具條碼');
+      return;
+    }
 
     let barcodeToStore = '';
     if (activeTab === 'upload') {
@@ -78,9 +92,40 @@ const Onboarding: React.FC = () => {
       barcodeToStore = `/${manualBarcode.trim()}`;
     }
 
-    localStorage.setItem('userBarcode', barcodeToStore);
-    localStorage.removeItem('userWalletAddress'); // 確保狀態互斥
-    navigate('/charities');
+    // 準備用戶註冊資料
+    const walletAddress = (typeof account === 'string' ? account : (account as any)?.address || account) as string;
+    const registrationData = {
+      walletAddress: walletAddress,
+      carrierNumber: barcodeToStore,
+      poolId: 1, // 預設 pool ID，可以之後讓用戶選擇
+      donationPercent: 20 // 預設捐贈比例 20%，可以之後讓用戶選擇
+    };
+
+    try {
+      // 呼叫 POST /api/users/register
+      const response = await fetch('/api/users/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registrationData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        console.log('用戶註冊成功:', result);
+        localStorage.setItem('userBarcode', barcodeToStore);
+        localStorage.removeItem('userWalletAddress'); // 確保狀態互斥
+        navigate('/charities');
+      } else {
+        console.error('用戶註冊失敗:', result);
+        alert(`註冊失敗: ${result.error || '未知錯誤'}`);
+      }
+    } catch (error) {
+      console.error('發票註冊請求失敗:', error);
+      alert('註冊請求失敗，請稍後再試');
+    }
   };
 
   // --- "Flow B" (錢包登入) 的處理函數 (Added) ---
@@ -130,9 +175,9 @@ const Onboarding: React.FC = () => {
       // 切換/新增鏈成功，接著啟動 connector（傳入數字 chainId 以符合 type）
       await metaMask.activate(zircuitTestnetParams.chainId);
 
-      // 如果 await 成功，連線就啟動了
-      localStorage.removeItem('userBarcode'); // 確保狀態互斥
-      navigate('/charities'); // 導航到下一頁
+      // 錢包連接成功，但不自動跳轉
+      // 用戶需要點擊「開始使用」按鈕才能註冊
+      console.log('錢包連接成功');
 
     } catch (err: any) {
       // 錯誤處理
