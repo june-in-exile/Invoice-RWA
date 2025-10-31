@@ -94,16 +94,16 @@ The Oracle API allows manual input of Taiwan lottery winning numbers to automati
 
 The Taiwan invoice lottery has the following prize tiers:
 
-| Prize Tier | Match Criteria | Prize Amount (TWD) |
-|------------|----------------|-------------------|
-| Special Prize | Full 8 digits match special prize number | 10,000,000 |
-| Grand Prize | Full 8 digits match grand prize number | 2,000,000 |
-| First Prize | Full 8 digits match first prize number | 200,000 |
-| Second Prize | Last 7 digits match first prize | 40,000 |
-| Third Prize | Last 6 digits match first prize | 10,000 |
-| Fourth Prize | Last 5 digits match first prize | 4,000 |
-| Fifth Prize | Last 4 digits match first prize | 1,000 |
-| Sixth Prize | Last 3 digits match first prize | 200 |
+| Prize Tier    | Match Criteria                           | Prize Amount (TWD) |
+| ------------- | ---------------------------------------- | ------------------ |
+| Special Prize | Full 8 digits match special prize number | 10,000,000         |
+| Grand Prize   | Full 8 digits match grand prize number   | 2,000,000          |
+| First Prize   | Full 8 digits match first prize number   | 200,000            |
+| Second Prize  | Last 7 digits match first prize          | 40,000             |
+| Third Prize   | Last 6 digits match first prize          | 10,000             |
+| Fourth Prize  | Last 5 digits match first prize          | 4,000              |
+| Fifth Prize   | Last 4 digits match first prize          | 1,000              |
+| Sixth Prize   | Last 3 digits match first prize          | 200                |
 
 **Important:** Only 3 winning numbers need to be provided (Special Prize, Grand Prize, First Prize). All other prize tiers (2nd-6th) are automatically calculated based on the last N digits of the First Prize number.
 
@@ -125,12 +125,14 @@ Manually process lottery results with Taiwan lottery winning numbers.
 ```
 
 **Parameters:**
+
 - `lotteryDate` (string, required): Lottery date in YYYY-MM-DD format
 - `specialPrize` (string, required): 8-digit special prize number
 - `grandPrize` (string, required): 8-digit grand prize number
 - `firstPrize` (string, required): 8-digit first prize number
 
 **Validations:**
+
 - All prize numbers must be exactly 8 digits
 - Date must be in YYYY-MM-DD format
 - All fields are required
@@ -138,6 +140,7 @@ Manually process lottery results with Taiwan lottery winning numbers.
 #### Response
 
 **Success Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -173,6 +176,7 @@ Manually process lottery results with Taiwan lottery winning numbers.
 ```
 
 **Error Response (400 Bad Request):**
+
 ```json
 {
   "error": "All prize numbers must be 8 digits"
@@ -188,6 +192,7 @@ Manually process lottery results with Taiwan lottery winning numbers.
 #### Example Usage
 
 **Local Development:**
+
 ```bash
 curl -X POST http://localhost:3000/api/oracle/process-lottery \
   -H "Content-Type: application/json" \
@@ -200,6 +205,7 @@ curl -X POST http://localhost:3000/api/oracle/process-lottery \
 ```
 
 **ROFL Deployment:**
+
 ```bash
 curl -X POST https://p3000.m<machine-id>.<region>.rofl.app/api/oracle/process-lottery \
   -H "Content-Type: application/json" \
@@ -218,6 +224,7 @@ When you process lottery results:
 1. **Query Invoices**: The system queries all invoices for the specified lottery date that haven't been drawn yet (`drawn = false`)
 
 2. **Match Prizes**: Each invoice number is matched against all prize tiers:
+
    - **Special Prize**: Full 8-digit match → 10M TWD
    - **Grand Prize**: Full 8-digit match → 2M TWD
    - **First Prize**: Full 8-digit match → 200K TWD
@@ -228,6 +235,7 @@ When you process lottery results:
    - **Sixth Prize**: Last 3 digits match first prize → 200 TWD
 
 3. **Process Winners**: For each winning invoice:
+
    - Call smart contract's `notifyLotteryResult(tokenTypeId, prizeAmount)` on-chain
    - Mark invoice as `drawn = true` in database
    - Record `prize_amount` in database
@@ -242,23 +250,21 @@ When you process lottery results:
 
 Given `firstPrize = "12345678"`:
 
-| Invoice Number | Match | Prize Tier | Prize Amount |
-|---------------|-------|-----------|-------------|
-| 12345678 | Full match | First Prize | 200,000 TWD |
-| 22345678 | Last 7 digits | Second Prize | 40,000 TWD |
-| 00345678 | Last 6 digits | Third Prize | 10,000 TWD |
-| 99945678 | Last 5 digits | Fourth Prize | 4,000 TWD |
-| 88885678 | Last 4 digits | Fifth Prize | 1,000 TWD |
-| 77777678 | Last 3 digits | Sixth Prize | 200 TWD |
-| 11111111 | No match | No Prize | 0 TWD |
+| Invoice Number | Match         | Prize Tier   | Prize Amount |
+| -------------- | ------------- | ------------ | ------------ |
+| 12345678       | Full match    | First Prize  | 200,000 TWD  |
+| 22345678       | Last 7 digits | Second Prize | 40,000 TWD   |
+| 00345678       | Last 6 digits | Third Prize  | 10,000 TWD   |
+| 99945678       | Last 5 digits | Fourth Prize | 4,000 TWD    |
+| 88885678       | Last 4 digits | Fifth Prize  | 1,000 TWD    |
+| 77777678       | Last 3 digits | Sixth Prize  | 200 TWD      |
+| 11111111       | No match      | No Prize     | 0 TWD        |
 
 ### Testing
 
-The Oracle API can be tested using the provided test scripts:
+The project includes a comprehensive, self-contained integration test script that resets the database, runs the server, and executes a suite of API tests.
 
-```bash
-# Local testing
-./test-api.sh
+#### Prerequisites
 
 # ROFL deployment testing
 ./test-rofl-api.sh
