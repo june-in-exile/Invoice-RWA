@@ -267,8 +267,10 @@ The project includes a comprehensive, self-contained integration test script tha
 #### Prerequisites
 
 # ROFL deployment testing
+
 ./test-rofl-api.sh
-```
+
+````
 
 The test suite includes:
 - Validation of missing required fields
@@ -298,7 +300,7 @@ router.post("/process-lottery", async (req, res) => {
   }
   // ... rest of the code
 });
-```
+````
 
 ## Advanced Testing: Admin & Pool Management
 
