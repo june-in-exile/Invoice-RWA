@@ -472,7 +472,7 @@ Given `firstPrize = "12345678"`:
 
 | Invoice Number | Match         | Prize Tier   | Prize Amount |
 | -------------- | ------------- | ------------ | ------------ |
-| 12345678       | Full match    | First Prize  | 200,000 TWD  |
+| 12345678       | Full match    | First Pgitrize  | 200,000 TWD  |
 | 22345678       | Last 7 digits | Second Prize | 40,000 TWD   |
 | 00345678       | Last 6 digits | Third Prize  | 10,000 TWD   |
 | 99945678       | Last 5 digits | Fourth Prize | 4,000 TWD    |

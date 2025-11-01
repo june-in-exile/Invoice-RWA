@@ -28,3 +28,7 @@ contract:
    Fourth, modify test-api.sh to use these valid signatures, change expected statuses to 200 for successful
   calls, and add assertions to verify response data. Finally, run the backend and the updated test script to
   perform end-to-end functional testing.
+
+
+  可以直接幫我把目前的 deploy 全部刪掉、直接部署一個新的ROFL嗎？
+  
