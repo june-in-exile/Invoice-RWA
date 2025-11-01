@@ -20,7 +20,7 @@ fi
 
 
 # Configuration
-BASE_URL="${BASE_URL:-https://p3000.m957.opf-testnet-rofl-25.rofl.app}"
+BASE_URL="${BASE_URL:-https://p3000.m961.opf-testnet-rofl-25.rofl.app}"
 SKIP_INVOICE=false
 VERBOSE=false
 CURL_OPTS=""

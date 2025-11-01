@@ -61,10 +61,9 @@ services:
       # Monitoring
       - MIN_RELAYER_BALANCE=${MIN_RELAYER_BALANCE:-0.01}
 
-    # Volume for persistent SQLite database and shared socket
+    # Volume for persistent SQLite database
     volumes:
       - invoice-data:/rofl/storage
-      - app-run:/run
 
     # Health check
     healthcheck:
@@ -83,14 +82,7 @@ services:
     # Restart policy
     restart: unless-stopped
 
-  rofl-appd:
-    image: ghcr.io/oasisprotocol/rofl-appd:main
-    platform: linux/amd64
-    volumes:
-      - app-run:/run
-
 # Named volumes
 volumes:
   invoice-data:
     driver: local
-  app-run:

@@ -9,7 +9,7 @@ export default defineConfig({
     port: 3001,
     proxy: {
       '/api': {
-        target: 'https://p3000.m957.opf-testnet-rofl-25.rofl.app/',
+        target: 'https://p3000.m961.opf-testnet-rofl-25.rofl.app/',
         
         changeOrigin: true,
         

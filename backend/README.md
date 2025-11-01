@@ -542,15 +542,15 @@ Replace `localhost:3000` with your ROFL endpoint:
 
 ```bash
 # Health check
-curl https://p3000.m957.opf-testnet-rofl-25.rofl.app/health
+curl https://p3000.m961.opf-testnet-rofl-25.rofl.app/health
 
 # Register user
-curl -X POST https://p3000.m957.opf-testnet-rofl-25.rofl.app/api/users/register \
+curl -X POST https://p3000.m961.opf-testnet-rofl-25.rofl.app/api/users/register \
   -H "Content-Type: application/json" \
   -d '{"walletAddress": "0x...", "carrierNumber": "12345678", "poolId": 1, "donationPercent": 20}'
 
 # Get user invoices
-curl https://p3000.m957.opf-testnet-rofl-25.rofl.app/api/invoices/user/0x...
+curl https://p3000.m961.opf-testnet-rofl-25.rofl.app/api/invoices/user/0x...
 ```
 
 ## ROFL Deployment Guide
