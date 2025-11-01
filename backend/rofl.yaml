@@ -1,0 +1,69 @@
+name: invoice-rwa-backend
+version: 0.1.0
+description: Invoice RWA backend service with SQLite storage
+tee: tdx
+kind: container
+resources:
+  memory: 2048
+  cpus: 2
+  storage:
+    kind: disk-persistent
+    size: 10240
+artifacts:
+  firmware: https://github.com/oasisprotocol/oasis-boot/releases/download/v0.6.2/ovmf.tdx.fd#db47100a7d6a0c1f6983be224137c3f8d7cb09b63bb1c7a5ee7829d8e994a42f
+  kernel: https://github.com/oasisprotocol/oasis-boot/releases/download/v0.6.2/stage1.bin#e5d4d654ca1fa2c388bf64b23fc6e67815893fc7cb8b7cfee253d87963f54973
+  stage2: https://github.com/oasisprotocol/oasis-boot/releases/download/v0.6.2/stage2-podman.tar.bz2#b2ea2a0ca769b6b2d64e3f0c577ee9c08f0bb81a6e33ed5b15b2a7e50ef9a09f
+  container:
+    runtime: https://github.com/oasisprotocol/oasis-sdk/releases/download/rofl-containers%2Fv0.8.2/rofl-containers#e9589c9cb68aee146a61ceefcce749ef5a391258dd26dc3037027733d883839f
+    compose: compose.yaml
+deployments:
+  default:
+    app_id: rofl1qqkceageya5p78hqmcr2wq8y3rtm4x95mukcz0zm
+    network: testnet
+    paratime: sapphire
+    admin: june
+    oci_repository: rofl.sh/b2300378-d7eb-429b-9fbd-fab54448c60c:1761965669
+    trust_root:
+      height: 29130747
+      hash: cc7487c602a0dcdbca851ed6dd973c6a266591c47031563b21c0414ab67f0133
+    policy:
+      quotes:
+        pcs:
+          tcb_validity_period: 30
+          min_tcb_evaluation_data_number: 18
+          tdx: {}
+      enclaves:
+        - id: yuw4Xm88gBzDmCw9XFBYYDvpu+rgVZkPGBNjdpB0A14AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+        - id: Wgxa9XKRcahsoUhA5hxKRey55Z7xi3kumm1uP/n8fgMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+      endorsements:
+        - any: {}
+      fees: endorsing_node
+      max_expiration: 3
+    secrets:
+      - name: INVOICE_TOKEN_V2_ADDRESS
+        value: pGJwa1ggTsmPHd78jhywlHF4UFnzI+IQSqai0IJRAtYd2btq6iFkbmFtZVgoOe0ZaOr3GwEurHlgwT7Ru5Tbn7TKFaGnt9hzC4lQh6K2Cyvh5SngKmVub25jZU+6hGw3frjE1l/rgUtB8tJldmFsdWVYOpB6UQxaXa65cUwEGyOlcIW0WK4vSxk7oU+osMjIQ8v9oJX6imlUs89xsj3VlADQzz7xEqMyHNmhOCc=
+      - name: POOL_V2_ADDRESS
+        value: pGJwa1ggNz6YtTAHESm+sZ7NOXqWJGKR+KyBOz+Z19+/0IUbnglkbmFtZVgf/WJ9QKJ2L0uhB2BOqgMVxlx/nh9SwJAzxl5PV/AWg2Vub25jZU9/qzPaMRn0JxNsz0WMOPJldmFsdWVYOrZerHTeQhd1aVYjT7FWUmlFbeOMrJ8ymfAQNzYCJH/euePAAJIgoIuMfNcMUrNfmnvsx0Pe3Uwb3fo=
+      - name: ADMIN_PRIVATE_KEY
+        value: pGJwa1ggjdADnV7XinRtDtz+xor3Td9vZM9xG8QebWIFspP02nRkbmFtZVghLTOw5kaBUiUMg9DT+1IF0cdS+IBvqCxWU3nzSvuBX3ZrZW5vbmNlT/y0WtP/vAiIa+zhRPmBRWV2YWx1ZVhS0BdaMu9GBMxznqzcw7v2S+7JKdSOMJ+1YRcWjMY9Bs4f9ldTdNnIfL/MKtKkQY2J6GuV1ZQncuhymRBAi2UNvbxj5rCKXPExp4q8oHPsy9xJ6A==
+      - name: RELAYER_PRIVATE_KEY
+        value: pGJwa1ggvfSIOxvbJ49mnplWuGZOxXALf9MjqAGrEfrq9SJenhJkbmFtZVgjxRL1zZe8TlJOb9OZex9svuqE6+ma1Pxg3CTDMMvJe+nDP6Jlbm9uY2VP8Wy6goI8oqRt6BYMQ5zeZXZhbHVlWFLRpRHTv2he4AW93dYorkZEicgOGwRdBuMcaRQ4stvBuw/2iXRFeNCCvYJwFfyZBeZlyU0osjhVNDpxUaq6T2szjgDUoZoYBioWcUdw8fflrOJi
+      - name: RELAYER_ADDRESS
+        value: pGJwa1ggnI6dLZOESJdEmQka+RDHT+beMjQAVAym7KNScz47NXtkbmFtZVgfcnashT5kG6KGSr6+nxbozyHeZA+05uoY7QffDNgJV2Vub25jZU9yaapG98QrfwVJKSlybxhldmFsdWVYOhCfRhC6i5a09bU8DeWe02SAYqPW2ZoNPc9DfgxYAI021IoVHyLYwE+XRm7a+3hE/jVV+BCkH/Iy+Og=
+      - name: ORACLE_PRIVATE_KEY
+        value: pGJwa1ggS1CHuVIp+P9R8ccpYy6fobs3OTgtcVi18fDkvlS88hNkbmFtZVgibP9t7rYAn0BELYUbAgfW2u0zOUYvMbAAZ0hIpsUgpU6msGVub25jZU/NdaGY0VjdTQ5fG3NwidFldmFsdWVYUrnIHBVpMmnx3kISkVkqZJOTWzfUJSmeMOpxcCj3ATNG8pszsjDyva97QKvVHxVHAW/EJviUZuBxySWcnkUI/qP+p3XMoc9GK1fF961C/XcheaM=
+      - name: ORACLE_ADDRESS
+        value: pGJwa1ggm9FaHGrif+yzr8UU5v1EpPsQ0iZvYneJAgrEUsF5HnpkbmFtZVgeDBFESfQJ2NwBvLrcrH3e118OtK2aKmIrVF9KmPCmZW5vbmNlT/+1pD9W+EV6e25suUHnIGV2YWx1ZVg6iBgiHKVFL8jXkxCQla6SjrQRvZe397GwSQB9wP7u0k2SXvPbFLaBJWWW+wrzO/O6A5rsRAsABqiSdQ==
+      - name: BENEFICIARY_ADDRESS
+        value: pGJwa1ggXp+mldHogsdrp7fKsu+Xklk/IJgFq4OGjpI9oZfSgWZkbmFtZVgjDv9H+XbXEShWro4DJRAIkLX+hW5P1pSKNXTQRtjkh5KGPiVlbm9uY2VPL+Rs/ZTGfDgdJpgKhZoOZXZhbHVlWDr9BYgVgWz2MmSnZKHzdSPvBrLqysFabXTc35HwCv7UTVAEgTGQ09eQ4/QN1qgrnotbYBzQ7DJJ1OEB
+      - name: BENEFICIARY_PRIVATE_KEY
+        value: pGJwa1ggv7Ij24YeVsOqyQWwzRNS6G2Wuh/3tXZVJ65wwkeGtyVkbmFtZVgnwrbdzrWXQf47GS7jQE2TVLxwXzzU8+3gu60JFZxytiN5KkxdoopeZW5vbmNlT5wI7E92MbTjeE7ckDaN72V2YWx1ZVhQRpBOVYgx7f1j3ERwOlgQ1uHsl+ZRSgFk/4zFLx1GaBuw0Z40IMRgoEKWNOiRfRh3i4pjol4d1NGKmP77HcYCRewv3bQvsj0SpIBdZ6tonXo=
+      - name: CHAIN_ID
+        value: pGJwa1gg1e7OlQzwV+AS63nyft0kNGGiu0XEyHaq5sHoLOadlwpkbmFtZVgYaFSaMQTO4MtkGsWo/HvW0VZmVMwEIc+2ZW5vbmNlTyTXtQcKUSL2lnwQAcRX6WV2YWx1ZVVOHewvLqITBvmTy7lqHwbMO4ojd7w=
+      - name: ZIRCUIT_RPC_URL
+        value: pGJwa1ggtvJ+2B8JsfxiKbsp43007mbRz3jPu9t7XFvl609N82pkbmFtZVgf3LkUtoRg+BBjx83gYLniO3KonUwcUgmLAOkmDKB7OGVub25jZU/CWPPOgRt9DlCTgAmtFZFldmFsdWVYNOiSImxnh782jKFhDcvo1a9ForDMWhl5lIUdfMZrJY26AvYM/qyNn4rBorxMAph6qfn1LVc=
+    machines:
+      default:
+        provider: oasis1qp2ens0hsp7gh23wajxa4hpetkdek3swyyulyrmz
+        offer: playground_short
+        id: 00000000000003c1

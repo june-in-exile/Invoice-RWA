@@ -1,0 +1,5 @@
+{
+  "name": "Copy of Invoice Pool",
+  "description": "An application to manage and donate electronic invoice winnings to charity pools, built on a secure wallet infrastructure.",
+  "requestFramePermissions": []
+}

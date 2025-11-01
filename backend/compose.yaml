@@ -1,0 +1,88 @@
+services:
+  invoice-rwa-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    # Public image registry (update with your username)
+    # For Docker Hub:
+    # image: "docker.io/df41022/invoice-rwa-backend:latest"
+    # For GitHub Container Registry:
+    image: "ghcr.io/june-in-exile/invoice-rwa-backend:latest"
+
+    # Platform must be linux/amd64 for ROFL compatibility
+    platform: linux/amd64
+
+    # Port mapping for local testing
+    ports:
+      - "3000:3000"
+
+    # Environment variables
+    # For local testing, these can be set here
+    # For ROFL deployment, use "oasis rofl secret set" instead
+    environment:
+      # Server configuration
+      - NODE_ENV=production
+      - PORT=3000
+
+      # Database configuration
+      - DB_TYPE=sqlite
+      - DB_PATH=/rofl/storage/invoice_rwa.db
+      - DB_NAME=invoice_rwa
+
+      # Blockchain configuration
+      - ZIRCUIT_RPC_URL=${ZIRCUIT_TESTNET_RPC_URL:-https://zircuit-garfield.liquify.com}
+      - CHAIN_ID=${CHAIN_ID:-48898}
+
+      # Contract addresses
+      - INVOICE_TOKEN_ADDRESS=${INVOICE_TOKEN_ADDRESS}
+      - POOL_ADDRESS=${POOL_ADDRESS}
+
+      - INVOICE_TOKEN_V2_ADDRESS=${INVOICE_TOKEN_V2_ADDRESS}
+      - POOL_V2_ADDRESS=${POOL_V2_ADDRESS}
+
+      - ZIRCUIT_TESTNET_RPC_URL=${ZIRCUIT_TESTNET_RPC_URL:-https://zircuit-garfield.liquify.com}
+
+      # Relayer configuration (secrets should be set via ROFL CLI in production)
+      - RELAYER_PRIVATE_KEY=${RELAYER_PRIVATE_KEY}
+      - RELAYER_ADDRESS=${RELAYER_ADDRESS}
+      - ADMIN_PRIVATE_KEY=${ADMIN_PRIVATE_KEY}
+      - ADMIN_ADDRESS=${ADMIN_ADDRESS}
+
+      # Oracle configuration
+      - ORACLE_PRIVATE_KEY=${ORACLE_PRIVATE_KEY}
+      - ORACLE_ADDRESS=${ORACLE_ADDRESS}
+
+      - BENEFICIARY_ADDRESS=${BENEFICIARY_ADDRESS}
+
+      # Event listener (optional)
+      - ENABLE_EVENT_LISTENER=${ENABLE_EVENT_LISTENER:-false}
+
+      # Monitoring
+      - MIN_RELAYER_BALANCE=${MIN_RELAYER_BALANCE:-0.01}
+
+    # Volume for persistent SQLite database
+    volumes:
+      - invoice-data:/rofl/storage
+
+    # Health check
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})",
+        ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+    # Restart policy
+    restart: unless-stopped
+
+# Named volumes
+volumes:
+  invoice-data:
+    driver: local
