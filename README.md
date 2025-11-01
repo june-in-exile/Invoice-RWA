@@ -1,14 +1,26 @@
 # Invoice-RWA
 
-## Deployment
+## Architecture Overview
 
-- Zircuit Contracts
+This system employs a dual-chain architecture that combines the security features of both Zircuit and Oasis ROFL:
 
+**[Zircuit](https://www.zircuit.com/) - Smart Contract Layer**
+
+- Hosts core smart contracts:
   - InvoiceTokenV2: https://explorer.garfield-testnet.zircuit.com/address/0x93Ed785884143334cb44ac06d72F9A51cfEFce63
   - PoolV2: https://explorer.garfield-testnet.zircuit.com/address/0xfF66e84852ad81446E0410bDc486edE8CBDAB6Db
+- Leverages Zircuit's security mechanisms to protect contracts from malicious actors attempting to mint unauthorized tokens or steal donations
+- Ensures on-chain asset and transaction security
 
-- Oasis ROFL
-  - Sapphire: https://explorer.oasis.io/testnet/sapphire/rofl/app/rofl1qr8sku6hdlqrld8af8k939nk0ls7w3jz8g95f24h
+**[Oasis ROFL](https://docs.oasis.io/build/rofl/) - Backend Service Layer**
+
+- Runs encrypted backend services within a TEE (Trusted Execution Environment)
+- Protects sensitive user registration data (wallet addresses, carrier numbers, etc.)
+- Utilizes [Authenticated Transaction](https://docs.oasis.io/build/rofl/features/appd) mechanism to ensure the authenticity and integrity of data sources
+- Acts as a trusted Oracle during lottery draws, securely notifying smart contracts of winning results
+- Deployment on Sapphire: https://explorer.oasis.io/testnet/sapphire/rofl/app/rofl1qr8sku6hdlqrld8af8k939nk0ls7w3jz8g95f24h
+
+![alt text](rofl-deployment.png)
 
 ## Backend
 
