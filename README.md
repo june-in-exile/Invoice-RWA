@@ -1,6 +1,12 @@
 # Invoice-RWA
 
+## Introduction
+
+Notion: https://www.notion.so/Receipt-fi-2991ef2ef38180d2908ec020e30edaba?source=copy_link (Mandarin)
+
 ## Architecture Overview
+
+![alt text](image.png)
 
 This system employs a dual-chain architecture that combines the security features of both Zircuit and Oasis ROFL:
 
